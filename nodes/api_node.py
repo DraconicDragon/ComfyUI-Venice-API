@@ -320,7 +320,7 @@ class GenerateImage(GenerateImageBase):
                 "style_preset": style_preset,
                 "negative_prompt": neg_prompt,
             }
-            if style_preset == "":
+            if style_preset == "": # probably not needed but
                 del payload["style_preset"]
             headers = {"Authorization": f"Bearer {os.getenv('VENICE_API_KEY')}", "Content-Type": "application/json"}
 
