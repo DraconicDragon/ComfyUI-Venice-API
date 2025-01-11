@@ -195,6 +195,7 @@ class GenerateImage(GenerateImageBase):
                 "guidance": ("FLOAT", {"default": 3.0, "min": 0.1, "max": 15.0}),
                 "style_preset": (
                     [
+                        "none",
                         "3D Model",
                         "Analog Film",
                         "Anime",
@@ -272,7 +273,7 @@ class GenerateImage(GenerateImageBase):
                         "Silhouette",
                         "Tilt-Shift",
                     ],
-                    {"default": ""},
+                    {"default": "none"},
                 ),
                 "hide_watermark": ("BOOLEAN", {"default": True}),
                 "api_key": ("STRING", {"default": "your_key_here"}),
@@ -306,7 +307,6 @@ class GenerateImage(GenerateImageBase):
         try:
             # Override the base class method to handle the response directly
             self.check_multiple_of_32(width, height)
-            style_preset = style_preset.strip()
             payload = {
                 "model": model,
                 "prompt": prompt,
@@ -320,8 +320,9 @@ class GenerateImage(GenerateImageBase):
                 "style_preset": style_preset,
                 "negative_prompt": neg_prompt,
             }
-            if style_preset == "": # probably not needed but
+            if style_preset == "" or style_preset == "none":  # probably not needed but
                 del payload["style_preset"]
+
             headers = {"Authorization": f"Bearer {os.getenv('VENICE_API_KEY')}", "Content-Type": "application/json"}
 
             url = os.getenv("VENICE_BASE_URL") + API_ENDPOINTS["image_generate"]
