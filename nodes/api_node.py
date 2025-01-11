@@ -226,7 +226,7 @@ class GenerateImage(GenerateImageBase):
         try:
             # Override the base class method to handle the response directly
             self.check_multiple_of_32(width, height)
-            seed = seed if seed != -1 else None  # i forgor
+            style_preset = style_preset.strip()
             payload = {
                 "model": model,
                 "prompt": prompt,
@@ -240,6 +240,7 @@ class GenerateImage(GenerateImageBase):
                 "style_preset": style_preset,
                 "negative_prompt": neg_prompt,
             }
+            if style_preset == "": del payload["style_preset"]
             headers = {"Authorization": f"Bearer {os.getenv('VENICE_API_KEY')}", "Content-Type": "application/json"}
 
             url = os.getenv("VENICE_BASE_URL") + API_ENDPOINTS["image_generate"]
