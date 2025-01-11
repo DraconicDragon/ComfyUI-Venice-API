@@ -57,20 +57,28 @@ class GenerateImageBase:
     FUNCTION = "generate_image"
     CATEGORY = "venice.ai"
 
-    def get_models(self, type: str) -> list:  # type = image or text model
-        try:
-            headers = {"Authorization": f"Bearer {os.getenv('VENICE_API_KEY')}"}
-            url = urljoin(os.getenv("VENICE_BASE_URL"), API_ENDPOINTS["list_models"])
-            response = requests.request("GET", url, headers=headers).json()
-            # response returns a dict with a data key containing a list of models where 'id' is the model name and what we want with "type" denoting model type
-            return [model["id"] for model in response["data"] if model["type"] == type]
+def get_models(self, model_type: str) -> list:  # model_type = image or text model
+    try:
+        headers = {"Authorization": f"Bearer {os.getenv('VENICE_API_KEY')}"}
+        url = urljoin(os.getenv("VENICE_BASE_URL"), API_ENDPOINTS["list_models"])
+        response = requests.get(url, headers=headers).json()
 
-        except Exception as e:
-            print(f"Could not fetch models: {str(e)} \n Attempting to switch to default selection...")
-            if type == "image":
-                return ["flux-dev", "flux-dev-uncensored", "fluently-xl", "pony-realism"]
-            elif type == "text":
-                return ["dolphin-2.9.2-qwen2-72b"]  # dont know which models supported or if any
+        print(f"Debug - Response: {response}")
+        print(f"Debug - Response type: {type(response)}")
+
+        if not isinstance(response, dict) or "data" not in response or not isinstance(response["data"], list):
+            raise ValueError("Unexpected API response format")
+
+        return [model["id"] for model in response["data"] if model.get("type") == model_type]
+
+    except Exception as e:
+        print(f"Could not fetch models: {str(e)}\nAttempting to switch to default selection...")
+        if model_type == "image":
+            return ["flux-dev", "flux-dev-uncensored", "fluently-xl", "pony-realism"]
+        elif model_type == "text":
+            return ["dolphin-2.9.2-qwen2-72b"]
+        else:
+            return ["check console"]  # dont know which models supported or if any
 
     def process_result(self, result):
         try:
