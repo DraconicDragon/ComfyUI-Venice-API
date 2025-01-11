@@ -2,7 +2,6 @@ import base64
 import configparser
 import io
 import os
-from urllib.parse import urljoin
 
 import numpy as np
 import requests
@@ -60,7 +59,7 @@ class GenerateImageBase:
     def get_models(self, model_type: str) -> list:  # model_type = image or text model
         try:
             headers = {"Authorization": f"Bearer {os.getenv('VENICE_API_KEY')}"}
-            url = urljoin(os.getenv("VENICE_BASE_URL"), API_ENDPOINTS["list_models"])
+            url = os.getenv("VENICE_BASE_URL") + API_ENDPOINTS["list_models"]
             response = requests.get(url, headers=headers).json()
 
             print(f"Debug - Response: {response}")
@@ -146,7 +145,7 @@ class GenerateImageBase:
             }
             headers = {"Authorization": f"Bearer {os.getenv('VENICE_API_KEY')}", "Content-Type": "application/json"}
 
-            url = urljoin(os.getenv("VENICE_BASE_URL"), API_ENDPOINTS["image_generate"])
+            url = os.getenv("VENICE_BASE_URL") + API_ENDPOINTS["image_generate"]
             response = requests.request("POST", url, json=payload, headers=headers)
             return self.process_result(response.json())
 
@@ -159,9 +158,9 @@ class GenerateImage(GenerateImageBase):
 
     @classmethod
     def INPUT_TYPES(cls):
-        #instance = cls()
-        
-        #models = instance.get_models(model_type="image")
+        # instance = cls()
+
+        # models = instance.get_models(model_type="image")
         return {
             "required": {
                 "model": (["flux-dev", "flux-dev-uncensored", "fluently-xl", "pony-realism"], {"default": "flux-dev"}),
@@ -240,7 +239,7 @@ class GenerateImage(GenerateImageBase):
             }
             headers = {"Authorization": f"Bearer {os.getenv('VENICE_API_KEY')}", "Content-Type": "application/json"}
 
-            url = urljoin(os.getenv("VENICE_BASE_URL"), API_ENDPOINTS["image_generate"])
+            url = os.getenv("VENICE_BASE_URL") + API_ENDPOINTS["image_generate"]
             response = requests.request("POST", url, json=payload, headers=headers)
             print(f"Debug - Response type: {type(response)}")
             print(f"Debug - Response content: {response}")

@@ -1,4 +1,5 @@
-config.ini 
+config.ini
+test.py
 
 # Ignore Mac system files
 .DS_Store
