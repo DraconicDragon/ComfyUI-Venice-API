@@ -121,7 +121,7 @@ class GenerateImageBase:
         # except Exception as e:
         #     print(f"Error generating image: {str(e)}")
         #     return self.create_blank_image()
-        # todo: is unsued + needs vars updated
+        # todo: is unsued rn
         try:
             payload = {
                 "model": arguments["model"],
@@ -151,7 +151,7 @@ class GenerateImage(GenerateImageBase):
     @classmethod
     def INPUT_TYPES(cls):
         return {
-            "required": {  # todo: make api request to get model list instead of hardcoded
+            "required": {
                 "model": (super().get_models(type="image"), {"default": "flux-dev"}),
                 "prompt": ("STRING", {"default": "A flying cat made of lettuce", "multiline": True}),
                 "neg_prompt": (
@@ -231,6 +231,8 @@ class GenerateImage(GenerateImageBase):
             url = urljoin(os.getenv("VENICE_BASE_URL"), API_ENDPOINTS["image_generate"])
             response = requests.request("POST", url, json=payload, headers=headers)
             return self.process_result(response.json())
+            #return super().generate_image(arguments)
+
 
         except Exception as e:
             print(f"Error generating image: {str(e)}")
