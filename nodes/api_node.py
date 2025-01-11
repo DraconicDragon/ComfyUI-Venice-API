@@ -196,7 +196,7 @@ class GenerateImage(GenerateImageBase):
             print("Ignoring negative prompt for flux-dev and flux-dev-uncensored models")
             neg_prompt = ""  # ignore negative to avoid error when using flux
 
-        arguments = {  # todo: unused rn but used for when using base class generate img function
+        arguments = {  # ignore for now
             "model": model,
             "prompt": prompt,
             "neg_prompt": neg_prompt,
@@ -231,8 +231,7 @@ class GenerateImage(GenerateImageBase):
             url = urljoin(os.getenv("VENICE_BASE_URL"), API_ENDPOINTS["image_generate"])
             response = requests.request("POST", url, json=payload, headers=headers)
             return self.process_result(response.json())
-            #return super().generate_image(arguments)
-
+            # return super().generate_image(arguments)
 
         except Exception as e:
             print(f"Error generating image: {str(e)}")
