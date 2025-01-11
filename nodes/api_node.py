@@ -241,6 +241,9 @@ class GenerateImage(GenerateImageBase):
 
             url = urljoin(os.getenv("VENICE_BASE_URL"), API_ENDPOINTS["image_generate"])
             response = requests.request("POST", url, json=payload, headers=headers)
+            print(f"Debug - Response type: {type(response)}")
+            print(f"Debug - Response content: {response}")
+            print(f"Debug - Response content: {response.json()}")
             return self.process_result(response.json())
             # return super().generate_image(arguments)
 
