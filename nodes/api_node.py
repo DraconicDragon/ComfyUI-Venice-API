@@ -193,7 +193,87 @@ class GenerateImage(GenerateImageBase):
                 ),
                 "steps": ("INT", {"default": 20, "min": 1, "max": 30}),
                 "guidance": ("FLOAT", {"default": 3.0, "min": 0.1, "max": 15.0}),
-                "style_preset": ("STRING", {"default": "", "placeholder": "Long Exposure"}),
+                "style_preset": (
+                    [
+                        "3D Model",
+                        "Analog Film",
+                        "Anime",
+                        "Cinematic",
+                        "Comic Book",
+                        "Craft Clay",
+                        "Digital Art",
+                        "Enhance",
+                        "Fantasy Art",
+                        "Isometric Style",
+                        "Line Art",
+                        "Lowpoly",
+                        "Neon Punk",
+                        "Origami",
+                        "Photographic",
+                        "Pixel Art",
+                        "Texture",
+                        "Advertising",
+                        "Food Photography",
+                        "Real Estate",
+                        "Abstract",
+                        "Cubist",
+                        "Graffiti",
+                        "Hyperrealism",
+                        "Impressionist",
+                        "Pointillism",
+                        "Pop Art",
+                        "Psychedelic",
+                        "Renaissance",
+                        "Steampunk",
+                        "Surrealist",
+                        "Typography",
+                        "Watercolor",
+                        "Fighting Game",
+                        "GTA",
+                        "Super Mario",
+                        "Minecraft",
+                        "Pokemon",
+                        "Retro Arcade",
+                        "Retro Game",
+                        "RPG Fantasy Game",
+                        "Strategy Game",
+                        "Street Fighter",
+                        "Legend of Zelda",
+                        "Architectural",
+                        "Disco",
+                        "Dreamscape",
+                        "Dystopian",
+                        "Fairy Tale",
+                        "Gothic",
+                        "Grunge",
+                        "Horror",
+                        "Minimalist",
+                        "Monochrome",
+                        "Nautical",
+                        "Space",
+                        "Stained Glass",
+                        "Techwear Fashion",
+                        "Tribal",
+                        "Zentangle",
+                        "Collage",
+                        "Flat Papercut",
+                        "Kirigami",
+                        "Paper Mache",
+                        "Paper Quilling",
+                        "Papercut Collage",
+                        "Papercut Shadow Box",
+                        "Stacked Papercut",
+                        "Thick Layered Papercut",
+                        "Alien",
+                        "Film Noir",
+                        "HDR",
+                        "Long Exposure",
+                        "Neon Noir",
+                        "Silhouette",
+                        "Tilt-Shift",
+                    ],
+                    {"default": ""},
+                ),
                 "hide_watermark": ("BOOLEAN", {"default": True}),
                 "api_key": ("STRING", {"default": "your_key_here"}),
             },
@@ -204,8 +284,8 @@ class GenerateImage(GenerateImageBase):
     def generate_image(
         self, model, prompt, neg_prompt, width, height, steps, guidance, style_preset, hide_watermark, api_key, seed=-1
     ):
-        os.environ["VENICE_API_KEY"] = api_key # todo: updating nodes replaces config ini
-        
+        os.environ["VENICE_API_KEY"] = api_key  # todo: updating nodes replaces config ini
+
         if model in ["flux-dev", "flux-dev-uncensored"]:
             print("Ignoring negative prompt for flux-dev and flux-dev-uncensored models")
             neg_prompt = ""  # ignore negative to avoid error when using flux
@@ -240,7 +320,8 @@ class GenerateImage(GenerateImageBase):
                 "style_preset": style_preset,
                 "negative_prompt": neg_prompt,
             }
-            if style_preset == "": del payload["style_preset"]
+            if style_preset == "":
+                del payload["style_preset"]
             headers = {"Authorization": f"Bearer {os.getenv('VENICE_API_KEY')}", "Content-Type": "application/json"}
 
             url = os.getenv("VENICE_BASE_URL") + API_ENDPOINTS["image_generate"]
