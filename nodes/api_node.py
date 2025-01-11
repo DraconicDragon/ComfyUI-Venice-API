@@ -148,11 +148,14 @@ class GenerateImageBase:
 
 
 class GenerateImage(GenerateImageBase):
+
     @classmethod
     def INPUT_TYPES(cls):
+        instance = cls()
+        models = instance.get_models(type="image")
         return {
             "required": {
-                "model": (super().get_models(type="image"), {"default": "flux-dev"}),
+                "model": (models, {"default": "flux-dev"}),
                 "prompt": ("STRING", {"default": "A flying cat made of lettuce", "multiline": True}),
                 "neg_prompt": (
                     "STRING",
