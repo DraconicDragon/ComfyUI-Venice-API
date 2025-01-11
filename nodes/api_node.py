@@ -193,7 +193,7 @@ class GenerateImage(GenerateImageBase):
                 ),
                 "steps": ("INT", {"default": 20, "min": 1, "max": 30}),
                 "guidance": ("FLOAT", {"default": 3.0, "min": 0.1, "max": 15.0}),
-                "style_preset": ("STRING", {"placeholder": "Long Exposure"}),
+                "style_preset": ("STRING", {"default": "", "placeholder": "Long Exposure"}),
                 "hide_watermark": ("BOOLEAN", {"default": True}),
                 "api_key": ("STRING", {"default": "your_key_here"}),
             },
