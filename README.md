@@ -4,6 +4,8 @@ A custom node implementation for ComfyUI that integrates with venice.ai's Flux a
 
 ### Disclaimer: I just made this on a whim because someone wanted something similar to Together.AI custom nodes but have them use venice instead and I don't have access to any API keys for any of the mentioned services.
 
+Currently only supports generating an image, no list models/chat completions or upscale is implemented yet
+
 ## Features
 
 - Direct integration with venice.ai's Flux and SDXL models
@@ -28,7 +30,7 @@ pip install -r requirements.txt
 
 OR From the Comfyui Folder (this one is usually preferred if you have portable edition)
 ```bash
- ./python_embeded\python.exe -m pip install -r ComfyUI\custom_nodes\ComfyUI-FLUX-TOGETHER-API\requirements.txt
+ ./python_embeded\python.exe -m pip install -r ComfyUI\custom_nodes\ComfyUI-Venice-API\requirements.txt
 ```
 
 3. Edit the `config.ini` file in the root directory and add venice.ai API key:
@@ -84,6 +86,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ## Author
 
 Created by [BZcreativ](https://github.com/BZcreativ)
+
 venice.ai rewrite by [DraconicDragon](https://github.com/DraconicDragon)
 
 ## Contributing
@@ -91,5 +94,7 @@ venice.ai rewrite by [DraconicDragon](https://github.com/DraconicDragon)
 Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## Example
+
 todo
+
 i never installed these nodes lol
