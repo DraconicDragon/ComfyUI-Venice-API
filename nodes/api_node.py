@@ -195,14 +195,17 @@ class GenerateImage(GenerateImageBase):
                 "guidance": ("FLOAT", {"default": 3.0, "min": 0.1, "max": 15.0}),
                 "style_preset": ("STRING", {"placeholder": "Long Exposure"}),
                 "hide_watermark": ("BOOLEAN", {"default": True}),
+                "api_key": ("STRING", {"default": "your_key_here"}),
             },
             "optional": {"seed": ("INT", {"default": -1})},
         }
 
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
     def generate_image(
-        self, model, prompt, neg_prompt, width, height, steps, guidance, style_preset, hide_watermark, seed=-1
+        self, model, prompt, neg_prompt, width, height, steps, guidance, style_preset, hide_watermark, api_key, seed=-1
     ):
+        os.environ["VENICE_API_KEY"] = api_key # todo: updating nodes replaces config ini
+        
         if model in ["flux-dev", "flux-dev-uncensored"]:
             print("Ignoring negative prompt for flux-dev and flux-dev-uncensored models")
             neg_prompt = ""  # ignore negative to avoid error when using flux
