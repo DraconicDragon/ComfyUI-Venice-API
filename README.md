@@ -2,12 +2,14 @@
 
 A custom node implementation for ComfyUI that integrates with venice.ai's Flux and SDXL image generation models. This project is adapted from [ComfyUI-FLUX-TOGETHER-API](https://github.com/BZcreativ/ComfyUI-FLUX-TOGETHER-API) to work with the venice.ai API.
 
+### Disclaimer: I just made this on a whim because someone wanted something similar to Together.AI custom nodes but have them use venice instead and I don't have access to any API keys for any of the mentioned services.
+
 ## Features
 
 - Direct integration with venice.ai's Flux and SDXL models
 - Support for flux-dev, flux-dev-uncensored, fluently-xl and pony-realism 
 - Configurable parameters including steps, guidance scale, and dimensions
-- Negative prompt support (ignored for Flux)
+- Negative prompt support (ignored when Flux is selected)
 - Error handling and retry mechanisms
 
 
