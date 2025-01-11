@@ -160,7 +160,7 @@ class GenerateImage(GenerateImageBase):
     @classmethod
     def INPUT_TYPES(cls):
         instance = cls()
-        models = instance.get_models(type="image")
+        models = instance.get_models(model_type="image")
         return {
             "required": {
                 "model": (models, {"default": "flux-dev"}),
