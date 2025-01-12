@@ -289,7 +289,7 @@ class GenerateImage(GenerateImageBase):
 
         if model in ["flux-dev", "flux-dev-uncensored"]:
             print("Ignoring negative prompt for flux-dev and flux-dev-uncensored models")
-            neg_prompt = ""  # ignore negative to avoid error when using flux
+            neg_prompt = ""
 
         arguments = {  # ignore for now
             "model": model,
@@ -320,16 +320,15 @@ class GenerateImage(GenerateImageBase):
                 "style_preset": style_preset,
                 "negative_prompt": neg_prompt,
             }
-            if style_preset == "" or style_preset == "none":  # probably not needed but
+            if style_preset == "none": 
                 del payload["style_preset"]
 
             headers = {"Authorization": f"Bearer {os.getenv('VENICE_API_KEY')}", "Content-Type": "application/json"}
 
             url = os.getenv("VENICE_BASE_URL") + API_ENDPOINTS["image_generate"]
             response = requests.request("POST", url, json=payload, headers=headers)
-            print(f"Debug - Response type: {type(response)}")
-            print(f"Debug - Response content: {response}")
-            print(f"Debug - Response content: {response.json()}")
+            print(f"Debug - Response: {response}")
+            print(f"Debug - Response content: {response.content}")
             return self.process_result(response.json())
             # return super().generate_image(arguments)
 
