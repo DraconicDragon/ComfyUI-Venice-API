@@ -90,7 +90,7 @@ class GenerateImageBase:
             img_bytes = base64.b64decode(img_data)
             img = Image.open(io.BytesIO(img_bytes))
             img_array = np.array(img).astype(np.float32) / 255.0
-            img_tensor = torch.from_numpy(img_array).permute(2, 0, 1).unsqueeze(0)
+            img_tensor = torch.from_numpy(img_array).unsqueeze(0)
             return img_tensor
 
         except Exception as e:
@@ -485,7 +485,7 @@ class GenerateImage(GenerateImageBase):
 # endregion
 
 NODE_CLASS_MAPPINGS = {
-    "GenerateImage_VENICE": GenerateImage,  # todo: temp maybe
+    "GenerateImage_VENICE": GenerateImage,
     # "FluxPro_TOGETHER": FluxPro, # venice doesnt have flux pro/1.1/ultra
     # "FluxPro11_TOGETHER": FluxPro11,
 }

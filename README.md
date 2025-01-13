@@ -1,3 +1,5 @@
+last guaranteed working commit: 4d66f0e2da35bb211b3243a6bd4324dd20422d39
+
 # ComfyUI venice.ai Flux/SDXL API Node
 
 A custom node implementation for ComfyUI that integrates with venice.ai's Flux and SDXL image generation models. This project is adapted from [ComfyUI-FLUX-TOGETHER-API](https://github.com/BZcreativ/ComfyUI-FLUX-TOGETHER-API) to work with the venice.ai API.
