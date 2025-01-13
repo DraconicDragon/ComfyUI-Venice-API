@@ -8,6 +8,7 @@ import requests
 import torch
 from PIL import Image
 from tenacity import retry, stop_after_attempt, wait_exponential
+from torchvision import transforms
 
 API_ENDPOINTS = {
     "list_models": "/models",  # response type is list of strings
@@ -89,8 +90,8 @@ class GenerateImageBase:
 
             img_bytes = base64.b64decode(img_data)
             img = Image.open(io.BytesIO(img_bytes))
-            img_array = np.array(img).astype(np.float32) / 255.0
-            img_tensor = torch.from_numpy(img_array)[None, :]
+            transform = transforms.ToTensor()  # Apply the transform to the image
+            img_tensor = transform(img)
             return (img_tensor,)
 
         except Exception as e:
@@ -347,7 +348,7 @@ class GenerateImage(GenerateImageBase):
                 if response.status_code != 200:
                     raise ValueError(f"Error in response: {response} {response.content}")
                 images_tensor += self.process_result(response.json())
-            return torch.cat(images_tensor, dim=0)
+            return torch.stack(images_tensor)
             # return super().generate_image(arguments)
 
         except Exception as e:
