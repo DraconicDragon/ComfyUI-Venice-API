@@ -346,7 +346,7 @@ class GenerateImage(GenerateImageBase):
                 response = requests.request("POST", url, json=payload, headers=headers)
                 if response.status_code != 200:
                     raise ValueError(f"Error in response: {response} {response.content}")
-                images_tensor.append(self.process_result(response.json()).movedim(1, -1))
+                images_tensor.append(self.process_result(response.json()))
             return torch.cat(images_tensor, dim=0)
             # return super().generate_image(arguments)
 
