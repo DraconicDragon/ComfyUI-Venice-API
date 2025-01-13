@@ -51,6 +51,7 @@ class ConfigLoader:
 config_loader = ConfigLoader()
 
 
+# region image gen
 class GenerateImageBase:
     RETURN_TYPES = ("IMAGE",)
     FUNCTION = "generate_image"
@@ -81,11 +82,8 @@ class GenerateImageBase:
 
     def process_result(self, result):
         try:
-            print(f"Debug - Result type: {type(result)}")
-            print(f"Debug - Result content: {result}")
-
             if isinstance(result, dict) and "images" in result:
-                img_data = result["images"][0]  # Only first image is returned
+                img_data = result["images"][0]  # Only first image is returned because only 1 is possible rn
             else:
                 raise ValueError("Unexpected response format")
 
@@ -158,12 +156,12 @@ class GenerateImage(GenerateImageBase):
 
     @classmethod
     def INPUT_TYPES(cls):
-        # instance = cls()
-
-        # models = instance.get_models(model_type="image")
         return {
             "required": {
-                "model": (["flux-dev", "flux-dev-uncensored", "fluently-xl", "pony-realism", "stable-diffusion-3.5"], {"default": "flux-dev"}),
+                "model": (
+                    ["flux-dev", "flux-dev-uncensored", "fluently-xl", "pony-realism", "stable-diffusion-3.5"],
+                    {"default": "flux-dev"},
+                ),
                 "prompt": ("STRING", {"default": "A flying cat made of lettuce", "multiline": True}),
                 "neg_prompt": (
                     "STRING",
@@ -191,6 +189,7 @@ class GenerateImage(GenerateImageBase):
                         "step": 8,
                     },
                 ),
+                "batch_size": ("INT", {"default": 1, "min:": 1, "max": 4}),
                 "steps": ("INT", {"default": 20, "min": 1, "max": 30}),
                 "guidance": ("FLOAT", {"default": 3.0, "min": 0.1, "max": 15.0}),
                 "style_preset": (
@@ -283,7 +282,19 @@ class GenerateImage(GenerateImageBase):
 
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
     def generate_image(
-        self, model, prompt, neg_prompt, width, height, steps, guidance, style_preset, hide_watermark, api_key, seed=-1
+        self,
+        model,
+        prompt,
+        neg_prompt,
+        width,
+        height,
+        batch_size,
+        steps,
+        guidance,
+        style_preset,
+        hide_watermark,
+        api_key,
+        seed=-1,
     ):
         os.environ["VENICE_API_KEY"] = api_key  # todo: updating nodes replaces config ini
 
@@ -291,12 +302,15 @@ class GenerateImage(GenerateImageBase):
             print("Ignoring negative prompt for flux-dev and flux-dev-uncensored models")
             neg_prompt = ""
 
+        image_tensors = () # empty tuple
+        
         arguments = {  # ignore for now
             "model": model,
             "prompt": prompt,
             "neg_prompt": neg_prompt,
             "width": width,
             "height": height,
+            "batch_size": batch_size,
             "steps": steps,
             "cfg_scale": guidance,
             "style_preset": style_preset,
@@ -307,6 +321,7 @@ class GenerateImage(GenerateImageBase):
         try:
             # Override the base class method to handle the response directly
             self.check_multiple_of_32(width, height)
+
             payload = {
                 "model": model,
                 "prompt": prompt,
@@ -320,22 +335,86 @@ class GenerateImage(GenerateImageBase):
                 "style_preset": style_preset,
                 "negative_prompt": neg_prompt,
             }
-            if style_preset == "none": 
+            if style_preset == "none":
                 del payload["style_preset"]
 
             headers = {"Authorization": f"Bearer {os.getenv('VENICE_API_KEY')}", "Content-Type": "application/json"}
 
             url = os.getenv("VENICE_BASE_URL") + API_ENDPOINTS["image_generate"]
-            response = requests.request("POST", url, json=payload, headers=headers)
-            print(f"Debug - Response: {response}")
-            print(f"Debug - Response content: {response.content}")
-            return self.process_result(response.json())
+
+            for i in range(batch_size):
+                payload["seed"] = seed + i
+                response = requests.request("POST", url, json=payload, headers=headers)
+                if response.status_code != 200:
+                    raise ValueError(f"Error in response: {response} {response.content}")
+                image_tensors += self.process_result(response.json())
+            return image_tensors
             # return super().generate_image(arguments)
 
         except Exception as e:
             print(f"Error generating image: {str(e)}")
             return self.create_blank_image()
 
+
+# endregion
+
+
+# region text gen
+# class GenerateText:
+#     @classmethod
+#     def INPUT_TYPES(cls):
+#         return {
+#             "required": {
+#                 "model": (
+#                     ["llama-3.3-70b", "llama-3.2-3b", "dolphin-2.9.2-qwen2-72b", "llama-3.1-405b", "qwen32b"],
+#                     {"default": "llama-3.3-70b"},
+#                 ),
+#                 "prompt": ("STRING", {"default": "A flying cat made of lettuce", "multiline": True}),
+#                 "neg_prompt": (
+#                     "STRING",
+#                     {
+#                         "placeholder": "bad quality, worst quality,",
+#                         "multiline": True,
+#                         "tooltip": "Negative prompt. This is ignored when using flux-dev or flux-dev-uncensored",
+#                     },
+#                 ),
+#                 "width": (
+#                     "INT",
+#                     {
+#                         "default": 1024,
+#                         "min": 256,
+#                         "max": 2048,
+#                         "step": 8,
+#                     },
+#                 ),
+#                 "height": (
+#                     "INT",
+#                     {
+#                         "default": 1024,
+#                         "min": 256,
+#                         "max": 2048,
+#                         "step": 8,
+#                     },
+#                 ),
+#                 "steps": ("INT", {"default": 20, "min": 1, "max": 30}),
+#                 "guidance": ("FLOAT", {"default": 3.0, "min": 0.1, "max": 15.0}),
+#                 "style_preset": (
+#                     [
+#                         "none",
+#                         "3D Model",
+#                         "Analog Film",
+#                         "Anime",
+#                     ],
+#                     {"default": "none"},
+#                 ),
+#                 "hide_watermark": ("BOOLEAN", {"default": True}),
+#                 "api_key": ("STRING", {"default": "your_key_here"}),
+#             },
+#             "optional": {"seed": ("INT", {"default": -1})},
+#         }
+
+
+# endregion
 
 # region FluxPro
 
