@@ -8,7 +8,6 @@ import requests
 import torch
 from PIL import Image
 from tenacity import retry, stop_after_attempt, wait_exponential
-from torchvision import transforms
 
 API_ENDPOINTS = {
     "list_models": "/models",  # response type is list of strings
@@ -90,9 +89,9 @@ class GenerateImageBase:
 
             img_bytes = base64.b64decode(img_data)
             img = Image.open(io.BytesIO(img_bytes))
-            transform = transforms.ToTensor()  # Apply the transform to the image
-            img_tensor = transform(img)
-            return (img_tensor,)
+            img_array = np.array(img).astype(np.float32) / 255.0
+            img_tensor = torch.from_numpy(img_array)[None, :]
+            return img_tensor
 
         except Exception as e:
             print(f"Error processing image result: {str(e)}")
@@ -302,7 +301,7 @@ class GenerateImage(GenerateImageBase):
             print("Ignoring negative prompt for flux-dev and flux-dev-uncensored models")
             neg_prompt = ""
 
-        images_tensor = ()  # empty tuple
+        images_tensor = []  # empty list
 
         arguments = {  # ignore for now
             "model": model,
@@ -347,8 +346,8 @@ class GenerateImage(GenerateImageBase):
                 response = requests.request("POST", url, json=payload, headers=headers)
                 if response.status_code != 200:
                     raise ValueError(f"Error in response: {response} {response.content}")
-                images_tensor += self.process_result(response.json())
-            return torch.stack(images_tensor)
+                images_tensor.append(self.process_result(response.json()).movedim(1, -1))
+            return torch.cat(images_tensor, dim=0)
             # return super().generate_image(arguments)
 
         except Exception as e:
