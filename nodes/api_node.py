@@ -153,7 +153,6 @@ class GenerateImageBase:
 
 
 class GenerateImage(GenerateImageBase):
-
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -302,8 +301,8 @@ class GenerateImage(GenerateImageBase):
             print("Ignoring negative prompt for flux-dev and flux-dev-uncensored models")
             neg_prompt = ""
 
-        image_tensors = () # empty tuple
-        
+        images_tensor = ()  # empty tuple
+
         arguments = {  # ignore for now
             "model": model,
             "prompt": prompt,
@@ -347,8 +346,8 @@ class GenerateImage(GenerateImageBase):
                 response = requests.request("POST", url, json=payload, headers=headers)
                 if response.status_code != 200:
                     raise ValueError(f"Error in response: {response} {response.content}")
-                image_tensors += self.process_result(response.json())
-            return image_tensors
+                images_tensor += self.process_result(response.json())
+            return torch.cat(images_tensor, dim=0)
             # return super().generate_image(arguments)
 
         except Exception as e:
