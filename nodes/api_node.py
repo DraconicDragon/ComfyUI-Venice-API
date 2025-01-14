@@ -6,6 +6,7 @@ import os
 import numpy as np
 import requests
 import torch
+import torchvision.transforms as transforms
 from PIL import Image
 from tenacity import retry, stop_after_attempt, wait_exponential
 
@@ -64,7 +65,7 @@ class GenerateImageBase:
             response = requests.get(url, headers=headers).json()
 
             print(f"Debug - Response: {response}")
-            print(f"Debug - Response type: {type(response)}")
+            #print(f"Debug - Response type: {type(response)}")
 
             if not isinstance(response, dict) or "data" not in response or not isinstance(response["data"], list):
                 raise ValueError("Unexpected API response format")
@@ -91,6 +92,7 @@ class GenerateImageBase:
             img = Image.open(io.BytesIO(img_bytes))
             img_array = np.array(img).astype(np.float32) / 255.0
             img_tensor = torch.from_numpy(img_array).unsqueeze(0)
+            print(f"Debug - Image tensor shape: {img_tensor.shape}")
             return img_tensor
 
         except Exception as e:
@@ -345,7 +347,7 @@ class GenerateImage(GenerateImageBase):
                 payload["seed"] = seed + i
                 response = requests.request("POST", url, json=payload, headers=headers)
                 if response.status_code != 200:
-                    raise ValueError(f"Error in response: {response} {response.content}")
+                    raise ValueError(f"Error in response: {response}") #{response.content}
                 images_tensor.append(self.process_result(response.json()))
             return torch.cat(images_tensor, dim=0)
             # return super().generate_image(arguments)
@@ -484,14 +486,89 @@ class GenerateImage(GenerateImageBase):
 
 # endregion
 
+
+class TestNode:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "images_A": ("IMAGE",),
+                "images_B": ("IMAGE",),
+            }
+        }
+
+    CATEGORY = "testaaaaa"
+
+    RETURN_TYPES = ("IMAGE",)
+    RETURN_NAMES = ("IMAGE",)
+    FUNCTION = "merge"
+
+    def merge(self, images_A, images_B):
+        images = []
+        print(f"images_A: {images_A.shape}")
+        print(f"images_B: {images_B.shape}")
+        images.append(images_A)
+        # images.append(images_B)
+        all_images = torch.cat(images, dim=0)
+        print(f"all_images: {all_images.shape}")
+        return (all_images,)
+
+
+class TestNode2:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "images_A": ("IMAGE",),
+                "images_B": ("IMAGE",),
+            }
+        }
+
+    CATEGORY = "testaaaaa"
+
+    RETURN_TYPES = ("IMAGE",)
+    RETURN_NAMES = ("IMAGE",)
+    FUNCTION = "merge"
+
+    def merge(self, images_A, images_B):
+        images = []
+        print(f"images_A: {images_A.shape}")
+        print(f"images_B: {images_B.shape}")
+
+        transform = transforms.ToPILImage()
+        images_A = images_A.permute(0, 3, 1, 2)
+        images_B = images_B.permute(0, 3, 1, 2)
+        imgA = transform(images_A[0])
+        imgB = transform(images_B[0])
+        imgA.show()
+        imgB.show()
+
+        img_array = np.array(imgA).astype(np.float32) / 255.0
+        img_tensor = torch.from_numpy(img_array).unsqueeze(0)
+        print(f"Debug - Image tensor shape: {img_tensor.shape}")
+        images.append(img_tensor)
+
+        img_array = np.array(imgB).astype(np.float32) / 255.0
+        img_tensor = torch.from_numpy(img_array).unsqueeze(0)
+        print(f"Debug - Image tensor shape: {img_tensor.shape}")
+        images.append(img_tensor)
+        all_images = torch.cat(images, dim=0)
+        print(f"all_images: {all_images.shape}")
+        return (all_images,)
+
+
 NODE_CLASS_MAPPINGS = {
+    "testaaaaa": TestNode,
+    "testaaaaa2": TestNode2,
     "GenerateImage_VENICE": GenerateImage,
     # "FluxPro_TOGETHER": FluxPro, # venice doesnt have flux pro/1.1/ultra
     # "FluxPro11_TOGETHER": FluxPro11,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
+    "testaaaaa": "TestAAAAA",
+    "testaaaaa2": "TestAAAAA2",
     "GenerateImage_VENICE": "Generate Image (Venice)",
-    # "FluxPro_TOGETHER": "Flux Pro (TOGETHER)",
+    # "FluxPro_TOGETHER": "Flux Pro (TOGETHER)",https://music.youtube.com/watch?v=mH_Zl2Rgl5M
     # "FluxPro11_TOGETHER": "Flux Pro 1.1 (TOGETHER)",
 }
