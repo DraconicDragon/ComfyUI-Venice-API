@@ -65,7 +65,7 @@ class GenerateImageBase:
             response = requests.get(url, headers=headers).json()
 
             print(f"Debug - Response: {response}")
-            #print(f"Debug - Response type: {type(response)}")
+            # print(f"Debug - Response type: {type(response)}")
 
             if not isinstance(response, dict) or "data" not in response or not isinstance(response["data"], list):
                 raise ValueError("Unexpected API response format")
@@ -347,8 +347,10 @@ class GenerateImage(GenerateImageBase):
                 payload["seed"] = seed + i
                 response = requests.request("POST", url, json=payload, headers=headers)
                 if response.status_code != 200:
-                    raise ValueError(f"Error in response: {response}") #{response.content}
+                    raise ValueError(f"Error in response: {response}")  # {response.content}
                 images_tensor.append(self.process_result(response.json()))
+            print(f"Debug - Images tensor array:{images_tensor}")
+            print(f"Debug - cat tensor:{torch.cat(images_tensor, dim=0)}")
             return torch.cat(images_tensor, dim=0)
             # return super().generate_image(arguments)
 
