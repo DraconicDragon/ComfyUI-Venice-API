@@ -415,7 +415,6 @@ class GenerateText:
     CATEGORY = "venice.ai"
 
     def execute(self, model, prompt, frequency_penalty, presence_penalty, temperature, top_p):
-        import requests
 
         url = "https://api.venice.ai/api/v1/chat/completions"
         payload = {
