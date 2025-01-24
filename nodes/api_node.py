@@ -16,6 +16,8 @@ API_ENDPOINTS = {
     "upscale_image": "/image/upscale",  # NOTE: not supported yet in code, response type is image/png file
 }
 
+RSP = {"request": "<string>", "images": ["<string>"], "timing": {}}
+
 
 class ConfigLoader:
     def __init__(self):
@@ -349,8 +351,8 @@ class GenerateImage(GenerateImageBase):
                 if response.status_code != 200:
                     raise ValueError(f"Error in response: {response}")  # {response.content}
                 images_tensor.append(self.process_result(response.json()))
-            print(f"Debug - Images tensor array:{images_tensor}")
-            print(f"Debug - cat tensor:{torch.cat(images_tensor, dim=0)}")
+            print(f"Debug - Images tensor array:{images_tensor.shape}")
+            print(f"Debug - cat tensor:{torch.cat(images_tensor, dim=0).shape}")
             return torch.cat(images_tensor, dim=0)
             # return super().generate_image(arguments)
 
@@ -499,7 +501,7 @@ class TestNode:
             }
         }
 
-    CATEGORY = "testaaaaa"
+    CATEGORY = "venice.ai"
 
     RETURN_TYPES = ("IMAGE",)
     RETURN_NAMES = ("IMAGE",)
@@ -526,7 +528,7 @@ class TestNode2:
             }
         }
 
-    CATEGORY = "testaaaaa"
+    CATEGORY = "venice.ai"
 
     RETURN_TYPES = ("IMAGE",)
     RETURN_NAMES = ("IMAGE",)
@@ -542,8 +544,6 @@ class TestNode2:
         images_B = images_B.permute(0, 3, 1, 2)
         imgA = transform(images_A[0])
         imgB = transform(images_B[0])
-        imgA.show()
-        imgB.show()
 
         img_array = np.array(imgA).astype(np.float32) / 255.0
         img_tensor = torch.from_numpy(img_array).unsqueeze(0)
