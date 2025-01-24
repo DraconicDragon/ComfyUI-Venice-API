@@ -366,10 +366,12 @@ class GenerateImage(GenerateImageBase):
                 raise ValueError(f"Error in response: {response}")  # {response.content}
             images_tensor.append(self.process_result(response.json()))
             # images_tensor += self.process_result(RSP)
+
         print(f"Debug - Images tensor array:{[t.shape for t in images_tensor]}")
         print(f"Debug - cat tensor:{torch.cat(images_tensor, dim=0).shape}")
         merged = torch.cat(images_tensor, dim=0)
         print(f"aaaa {merged.shape}")
+
         return (merged,)
         # return super().generate_image(arguments)
 
@@ -382,58 +384,54 @@ class GenerateImage(GenerateImageBase):
 
 
 # region text gen
-# class GenerateText:
-#     @classmethod
-#     def INPUT_TYPES(cls):
-#         return {
-#             "required": {
-#                 "model": (
-#                     ["llama-3.3-70b", "llama-3.2-3b", "dolphin-2.9.2-qwen2-72b", "llama-3.1-405b", "qwen32b"],
-#                     {"default": "llama-3.3-70b"},
-#                 ),
-#                 "prompt": ("STRING", {"default": "A flying cat made of lettuce", "multiline": True}),
-#                 "neg_prompt": (
-#                     "STRING",
-#                     {
-#                         "placeholder": "bad quality, worst quality,",
-#                         "multiline": True,
-#                         "tooltip": "Negative prompt. This is ignored when using flux-dev or flux-dev-uncensored",
-#                     },
-#                 ),
-#                 "width": (
-#                     "INT",
-#                     {
-#                         "default": 1024,
-#                         "min": 256,
-#                         "max": 2048,
-#                         "step": 8,
-#                     },
-#                 ),
-#                 "height": (
-#                     "INT",
-#                     {
-#                         "default": 1024,
-#                         "min": 256,
-#                         "max": 2048,
-#                         "step": 8,
-#                     },
-#                 ),
-#                 "steps": ("INT", {"default": 20, "min": 1, "max": 30}),
-#                 "guidance": ("FLOAT", {"default": 3.0, "min": 0.1, "max": 15.0}),
-#                 "style_preset": (
-#                     [
-#                         "none",
-#                         "3D Model",
-#                         "Analog Film",
-#                         "Anime",
-#                     ],
-#                     {"default": "none"},
-#                 ),
-#                 "hide_watermark": ("BOOLEAN", {"default": True}),
-#                 "api_key": ("STRING", {"default": "your_key_here"}),
-#             },
-#             "optional": {"seed": ("INT", {"default": -1})},
-#         }
+class GenerateText:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "model": (
+                    [
+                        "llama-3.3-70b",
+                        "llama-3.2-3b",
+                        "dolphin-2.9.2-qwen2-72b",
+                        "llama-3.1-405b",
+                        "qwen32b",
+                    ],
+                    {
+                        "default": "llama-3.1-405b",
+                    },
+                ),
+                "prompt": ("STRING", {"default": "", "multiline": True}),
+                "frequency_penalty": ("FLOAT", {"default": 1.5, "min": 0.0, "max": 2.0, "step": 0.1}),
+                "presence_penalty": ("FLOAT", {"default": 1.5, "min": 0.0, "max": 2.0, "step": 0.1}),
+                "temperature": ("FLOAT", {"default": 0.5, "min": 0.0, "max": 2.0, "step": 0.1}),
+                "top_p": ("FLOAT", {"default": 0.9, "min": 0.0, "max": 1.0, "step": 0.1}),
+            }
+        }
+
+    RETURN_TYPES = ("STRING",)
+    RETURN_NAMES = ("response",)
+    FUNCTION = "generate"
+    CATEGORY = "venice.ai"
+
+    def execute(self, model, prompt, frequency_penalty, presence_penalty, temperature, top_p):
+        import requests
+
+        url = "https://api.venice.ai/api/v1/chat/completions"
+        payload = {
+            "model": model,
+            "messages": [
+                {"role": "system", "content": ""},
+                {"role": "user", "content": prompt},
+            ],
+            "frequency_penalty": frequency_penalty,
+            "presence_penalty": presence_penalty,
+            "temperature": temperature,
+            "top_p": top_p,
+        }
+        headers = {"Authorization": f"Bearer {os.getenv('VENICE_API_KEY')}", "Content-Type": "application/json"}
+        response = requests.request("POST", url, json=payload, headers=headers)
+        return (response.text,)
 
 
 # endregion
@@ -580,6 +578,7 @@ NODE_CLASS_MAPPINGS = {
     "testaaaaa": TestNode,
     "testaaaaa2": TestNode2,
     "GenerateImage_VENICE": GenerateImage,
+    "GenerateText_VENICE": GenerateText,
     # "FluxPro_TOGETHER": FluxPro, # venice doesnt have flux pro/1.1/ultra
     # "FluxPro11_TOGETHER": FluxPro11,
 }
@@ -588,6 +587,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "testaaaaa": "TestAAAAA",
     "testaaaaa2": "TestAAAAA2",
     "GenerateImage_VENICE": "Generate Image (Venice)",
+    "GenerateText_VENICE": "Generate Text (Venice)",
     # "FluxPro_TOGETHER": "Flux Pro (TOGETHER)",https://music.youtube.com/watch?v=mH_Zl2Rgl5M
     # "FluxPro11_TOGETHER": "Flux Pro 1.1 (TOGETHER)",
 }
