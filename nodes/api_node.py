@@ -97,15 +97,8 @@ class GenerateImageBase:
             raise ValueError("Unexpected response format")
 
         img_bytes = base64.b64decode(img_data)
-        # img = Image.open(io.BytesIO(img_bytes)).convert("RGB")
-        img = Image.open("./a.png").convert("RGB")
-        img.verify()
-        from IPython.display import display
-
-        print(f"Image format: {img.format}")
-        print(f"Image mode: {img.mode}")
-        print(f"Image size: {img.size}")
-        display(img)
+        img = Image.open(io.BytesIO(img_bytes)).convert("RGB")
+        # img = Image.open("./a.png").convert("RGB")
 
         transform = transforms.ToTensor()
         img_tensor = transform(img)  # Shape: [C, H, W]
