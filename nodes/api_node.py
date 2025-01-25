@@ -13,6 +13,7 @@ API_ENDPOINTS = {
     "list_models": "/models",  # response type is list of strings
     "image_generate": "/image/generate",  # response type is dict with images key, each item is image in base64
     "upscale_image": "/image/upscale",  # NOTE: not supported yet in code, response type is image/png file
+    "text_generate": "/chat/completions",  #
 }
 
 
@@ -403,7 +404,7 @@ class GenerateText:
     def generate_text(self, model, prompt, frequency_penalty, presence_penalty, temperature, top_p, api_key):
         os.environ["VENICE_API_KEY"] = api_key  # todo: updating nodes replaces config ini
 
-        url = "https://api.venice.ai/api/v1/chat/completions"
+        url = os.getenv("VENICE_BASE_URL") + API_ENDPOINTS["text_generate"]
         payload = {
             "model": model,
             "messages": [
