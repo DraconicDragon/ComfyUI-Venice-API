@@ -383,7 +383,7 @@ class GenerateText:
                         "qwen32b",
                     ],
                     {
-                        "default": "llama-3.1-405b",
+                        "default": "llama-3.2-3b",
                     },
                 ),
                 "prompt": ("STRING", {"default": "", "multiline": True}),
@@ -401,6 +401,7 @@ class GenerateText:
     CATEGORY = "venice.ai"
 
     def generate_text(self, model, prompt, frequency_penalty, presence_penalty, temperature, top_p, api_key):
+        os.environ["VENICE_API_KEY"] = api_key  # todo: updating nodes replaces config ini
 
         url = "https://api.venice.ai/api/v1/chat/completions"
         payload = {
@@ -416,6 +417,11 @@ class GenerateText:
         }
         headers = {"Authorization": f"Bearer {os.getenv('VENICE_API_KEY')}", "Content-Type": "application/json"}
         response = requests.request("POST", url, json=payload, headers=headers).json()
+
+        if response.status_code != 200:
+            raise ValueError(f"Error in response: {response} and {response.content}")
+        print(f"Debug - text gen Response: {response} - {response.content}")
+
         content = response["choices"][0]["message"]["content"]  # theres multiple choices, but for what idk yet
         return (content,)
 
