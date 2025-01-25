@@ -299,7 +299,7 @@ class GenerateImage(GenerateImageBase):
         api_key,
         seed=-1,
     ):
-        os.environ["VENICE_API_KEY"] = api_key  # todo: updating nodes replaces config ini
+        os.environ["VENICE_API_KEY"] = api_key  # todo: make it set in settings
 
         if model in ["flux-dev", "flux-dev-uncensored"]:
             print(f"VeniceAPI INFO: Ignoring negative prompt for {model}.")
@@ -406,7 +406,7 @@ class GenerateText:
     def generate_text(
         self, model, system_prompt, prompt, frequency_penalty, presence_penalty, temperature, top_p, api_key
     ):
-        os.environ["VENICE_API_KEY"] = api_key  # todo: updating nodes replaces config ini
+        os.environ["VENICE_API_KEY"] = api_key  # todo: make it set in settings
 
         url = os.getenv("VENICE_BASE_URL") + API_ENDPOINTS["text_generate"]
         payload = {
@@ -436,6 +436,9 @@ class GenerateText:
 
 
 # region upscale img
+
+
+# todo: btw i dont even know if this is supported over api, but i mean its in the documentation so why not?
 class UpscaleImage:
     @classmethod
     def INPUT_TYPES(cls):
@@ -452,7 +455,7 @@ class UpscaleImage:
     CATEGORY = "venice.ai"
 
     def upscale_image(self, image, api_key):
-        os.environ["VENICE_API_KEY"] = api_key  # todo: updating nodes replaces config ini
+        os.environ["VENICE_API_KEY"] = api_key  # todo: make it set in settings
 
         url = os.getenv("VENICE_BASE_URL") + API_ENDPOINTS["image_upscale"]
 
@@ -479,13 +482,12 @@ class UpscaleImage:
             to_tensor = ToTensor()
             tensor = to_tensor(upscaled_image)  # CHW format?
             print(f"Debug - Upscaled image tensor shape: {tensor.shape}")
-
             tensor_bhwc = tensor.permute(1, 2, 0)  # from (C, H, W) to (H, W, C)
-
             tensor_bhwc = tensor_bhwc.to(torch.float32)
 
             if tensor_bhwc.ndimension() == 3:  # HWC format
                 tensor_bhwc = tensor_bhwc.unsqueeze(0)  # Add batch dimension (B, H, W, C)
+                # i hate tensors
 
             return (tensor_bhwc,)
 
@@ -587,33 +589,6 @@ class TestNode:
         images = []
         print(f"images_A: {images_A.shape}")
         print(f"images_B: {images_B.shape}")
-        images.append(images_A)
-        # images.append(images_B)
-        all_images = torch.cat(images, dim=0)
-        print(f"all_images: {all_images.shape}")
-        return (all_images,)
-
-
-class TestNode2:
-    @classmethod
-    def INPUT_TYPES(s):
-        return {
-            "required": {
-                "images_A": ("IMAGE",),
-                "images_B": ("IMAGE",),
-            }
-        }
-
-    CATEGORY = "venice.ai"
-
-    RETURN_TYPES = ("IMAGE",)
-    RETURN_NAMES = ("IMAGE",)
-    FUNCTION = "merge"
-
-    def merge(self, images_A, images_B):
-        images = []
-        print(f"images_A: {images_A.shape}")
-        print(f"images_B: {images_B.shape}")
 
         transform = transforms.ToPILImage()
         images_A = images_A.permute(0, 3, 1, 2)
@@ -637,7 +612,6 @@ class TestNode2:
 
 NODE_CLASS_MAPPINGS = {
     "testaaaaa": TestNode,
-    "testaaaaa2": TestNode2,
     "GenerateImage_VENICE": GenerateImage,
     "UpscaleImage_VENICE": UpscaleImage,
     "GenerateText_VENICE": GenerateText,
@@ -647,7 +621,6 @@ NODE_CLASS_MAPPINGS = {
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "testaaaaa": "TestAAAAA",
-    "testaaaaa2": "TestAAAAA2",
     "GenerateImage_VENICE": "Generate Image (Venice)",
     "UpscaleImage_VENICE": "Upscale Image (Venice)",
     "GenerateText_VENICE": "Generate Text (Venice)",
