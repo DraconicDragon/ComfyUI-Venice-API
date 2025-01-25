@@ -430,7 +430,8 @@ class GenerateText:
         }
         headers = {"Authorization": f"Bearer {os.getenv('VENICE_API_KEY')}", "Content-Type": "application/json"}
         response = requests.request("POST", url, json=payload, headers=headers)
-        return (response.text,)
+        content = response["choices"][0]["message"]["content"] # theres multiple choices, but for what idk yet
+        return (content,)
 
 
 # endregion
