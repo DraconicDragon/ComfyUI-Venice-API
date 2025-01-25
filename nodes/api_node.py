@@ -356,14 +356,12 @@ class GenerateImage(GenerateImageBase):
             response = requests.request("POST", url, json=payload, headers=headers)
             if response.status_code != 200:
                 raise ValueError(f"Error in response: {response}")  # {response.content}
-            images_tensor.append(self.process_result(response.json()))
+            images_tensor += self.process_result(response.json())
             # images_tensor += self.process_result(RSP)
 
         print(f"Debug - Images tensor array:{[t.shape for t in images_tensor]}")
         print(f"Debug - cat tensor:{torch.cat(images_tensor, dim=0).shape}")
         merged = torch.cat(images_tensor, dim=0)
-        print(f"aaaa {merged.shape}")
-
         return (merged,)
         # return super().generate_image(arguments)
 
