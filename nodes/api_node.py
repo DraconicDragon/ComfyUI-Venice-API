@@ -416,13 +416,14 @@ class GenerateText:
             "top_p": top_p,
         }
         headers = {"Authorization": f"Bearer {os.getenv('VENICE_API_KEY')}", "Content-Type": "application/json"}
-        response = requests.request("POST", url, json=payload, headers=headers).json()
+        response = requests.request("POST", url, json=payload, headers=headers)
 
         if response.status_code != 200:
             raise ValueError(f"Error in response: {response} and {response.content}")
         print(f"Debug - text gen Response: {response} - {response.content}")
 
-        content = response["choices"][0]["message"]["content"]  # theres multiple choices, but for what idk yet
+        json_response = response.json()
+        content = json_response["choices"][0]["message"]["content"]  # theres multiple choices, but for what idk yet
         return (content,)
 
 
