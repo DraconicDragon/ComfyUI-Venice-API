@@ -82,30 +82,27 @@ class GenerateImageBase:
                 return ["check console"]  # dont know which models supported or if any
 
     def process_result(self, result):
-        # try:
-        if isinstance(result, dict) and "images" in result:
-            img_data = result["images"][0]  # Only first image is returned because only 1 is possible rn
-        else:
-            raise ValueError("Unexpected response format")
+        try:
+            if isinstance(result, dict) and "images" in result:
+                img_data = result["images"][0]  # Only first image is returned because only 1 is possible rn
+            else:
+                raise ValueError("Unexpected response format")
 
-        img_bytes = base64.b64decode(img_data)
-        img = Image.open(io.BytesIO(img_bytes)).convert("RGB")
-        # img = Image.open("./a.png").convert("RGB")
+            img_bytes = base64.b64decode(img_data)
+            img = Image.open(io.BytesIO(img_bytes)).convert("RGB")
+            # img = Image.open("./a.png").convert("RGB")
 
-        transform = transforms.ToTensor()
-        img_tensor = transform(img)  # Shape: [C, H, W]
-        img_tensor = img_tensor.unsqueeze(0)  # Shape: [B, H, W, C]
-        img_tensor = img_tensor.permute(0, 2, 3, 1)
+            transform = transforms.ToTensor()
+            img_tensor = transform(img)  # Shape: [C, H, W]
+            img_tensor = img_tensor.unsqueeze(0)  # add batch dimension as dimension 0
+            img_tensor = img_tensor.permute(0, 2, 3, 1)  # Shape: [B, H, W, C]
 
-        # img_array = np.array(img).astype(np.float32) / 255.0
-        # img_tensor = torch.from_numpy(img_array).unsqueeze(0)
-        # img_tensor = img_tensor.permute(0, 1, 2, 3)
-        print(f"Debug - Image tensor shape: {img_tensor.shape}")
-        return (img_tensor,)
+            print(f"Debug - Image tensor shape: {img_tensor.shape}")
+            return (img_tensor,)
 
-    # except Exception as e:
-    #     print(f"Error processing image result: {str(e)}")
-    #     return self.create_blank_image()
+        except Exception as e:
+            print(f"Error processing image result: {str(e)}")
+            return self.create_blank_image()
 
     def create_blank_image(self):
         blank_img = Image.new("RGB", (512, 512), color="black")
@@ -289,7 +286,6 @@ class GenerateImage(GenerateImageBase):
             "optional": {"seed": ("INT", {"default": -1})},
         }
 
-    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
     def generate_image(
         self,
         model,
@@ -327,47 +323,47 @@ class GenerateImage(GenerateImageBase):
             "seed": seed,
         }
 
-        # try:
-        # Override the base class method to handle the response directly
-        self.check_multiple_of_32(width, height)
+        try:
+            # Override the base class method to handle the response directly
+            self.check_multiple_of_32(width, height)
 
-        payload = {
-            "model": model,
-            "prompt": prompt,
-            "width": width,
-            "height": height,
-            "steps": steps,
-            "hide_watermark": hide_watermark,
-            "return_binary": False,
-            "seed": seed,
-            "cfg_scale": guidance,
-            "style_preset": style_preset,
-            "negative_prompt": neg_prompt,
-        }
-        if style_preset == "none":
-            del payload["style_preset"]
+            payload = {
+                "model": model,
+                "prompt": prompt,
+                "width": width,
+                "height": height,
+                "steps": steps,
+                "hide_watermark": hide_watermark,
+                "return_binary": False,
+                "seed": seed,
+                "cfg_scale": guidance,
+                "style_preset": style_preset,
+                "negative_prompt": neg_prompt,
+            }
+            if style_preset == "none":
+                del payload["style_preset"]
 
-        headers = {"Authorization": f"Bearer {os.getenv('VENICE_API_KEY')}", "Content-Type": "application/json"}
+            headers = {"Authorization": f"Bearer {os.getenv('VENICE_API_KEY')}", "Content-Type": "application/json"}
 
-        url = os.getenv("VENICE_BASE_URL") + API_ENDPOINTS["image_generate"]
+            url = os.getenv("VENICE_BASE_URL") + API_ENDPOINTS["image_generate"]
 
-        for i in range(batch_size):
-            payload["seed"] = seed + i
-            response = requests.request("POST", url, json=payload, headers=headers)
-            if response.status_code != 200:
-                raise ValueError(f"Error in response: {response}")  # {response.content}
-            images_tensor += self.process_result(response.json())
-            # images_tensor += self.process_result(RSP)
+            for i in range(batch_size):
+                payload["seed"] = seed + i
+                response = requests.request("POST", url, json=payload, headers=headers)
+                if response.status_code != 200:
+                    raise ValueError(f"Error in response: {response} and {response.content}")  # {response.content}
+                images_tensor += self.process_result(response.json())
+                # images_tensor += self.process_result(RSP)
 
-        print(f"Debug - Images tensor array:{[t.shape for t in images_tensor]}")
-        print(f"Debug - cat tensor:{torch.cat(images_tensor, dim=0).shape}")
-        merged = torch.cat(images_tensor, dim=0)
-        return (merged,)
-        # return super().generate_image(arguments)
+            # print(f"Debug - Images tensor array:{[t.shape for t in images_tensor]}")
+            # print(f"Debug - cat tensor:{torch.cat(images_tensor, dim=0).shape}")
+            merged = torch.cat(images_tensor, dim=0)
+            return (merged,)
+            # return super().generate_image(arguments)
 
-        # except Exception as e:
-        #     print(f"Error generating image: {str(e)}")
-        #     return self.create_blank_image()
+        except Exception as e:
+            print(f"Error generating image: {str(e)}")
+            return self.create_blank_image()
 
 
 # endregion
