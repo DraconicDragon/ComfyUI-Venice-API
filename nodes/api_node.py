@@ -12,12 +12,14 @@ from torchvision.transforms import ToPILImage, ToTensor
 
 API_ENDPOINTS = {
     "list_models": "/models",  # response type is list of strings
-    "image_generate": "/image/generate",  # response type is dict with images key, each item is image in base64
-    "upscale_image": "/image/upscale",  # NOTE: not supported yet in code, response type is image/png file
-    "text_generate": "/chat/completions",  #
+    "image_generate": "/image/generate",  # response type is json with images key, each item is image in base64
+    "upscale_image": "/image/upscale",  # NOTE: apparently doesnt even work yet? idk; response type is image/png file, content type is multipart/form-data
+    "text_generate": "/chat/completions",  # has much info, text response is in choices: content, can have multiple choices apparently but dosnt seem to be utilized
 }
 
 
+# NOTE: redundant stuff right now and if comfy settings is used instead but leaving here instead maybe i need it
+# hashtag hoarder mindset or something
 class ConfigLoader:
     def __init__(self):
         current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -60,6 +62,7 @@ class GenerateImageBase:
     CATEGORY = "venice.ai"
 
     def get_models(self, model_type: str) -> list:  # model_type = image or text model
+        # todo: needs rework, find way to run efficiently without each node or similar
         try:
             headers = {"Authorization": f"Bearer {os.getenv('VENICE_API_KEY')}"}
             url = os.getenv("VENICE_BASE_URL") + API_ENDPOINTS["list_models"]
@@ -301,11 +304,11 @@ class GenerateImage(GenerateImageBase):
     ):
         os.environ["VENICE_API_KEY"] = api_key  # todo: make it set in settings
 
+        images_tensor = ()  # empty tuple for tensors
+
         if model in ["flux-dev", "flux-dev-uncensored"]:
             print(f"VeniceAPI INFO: Ignoring negative prompt for {model}.")
             neg_prompt = ""
-
-        images_tensor = ()  # empty list
 
         arguments = {  # ignore for now
             "model": model,
@@ -322,8 +325,10 @@ class GenerateImage(GenerateImageBase):
         }
 
         try:
-            # Override the base class method to handle the response directly
             self.check_multiple_of_32(width, height)  # todo: make this be validate node instead
+
+            headers = {"Authorization": f"Bearer {os.getenv('VENICE_API_KEY')}", "Content-Type": "application/json"}
+            url = os.getenv("VENICE_BASE_URL") + API_ENDPOINTS["image_generate"]
 
             payload = {
                 "model": model,
@@ -341,10 +346,6 @@ class GenerateImage(GenerateImageBase):
             if style_preset == "none":
                 del payload["style_preset"]
 
-            headers = {"Authorization": f"Bearer {os.getenv('VENICE_API_KEY')}", "Content-Type": "application/json"}
-
-            url = os.getenv("VENICE_BASE_URL") + API_ENDPOINTS["image_generate"]
-
             for i in range(batch_size):
                 payload["seed"] = seed + i
                 response = requests.request("POST", url, json=payload, headers=headers)
@@ -355,10 +356,7 @@ class GenerateImage(GenerateImageBase):
                     )
 
                 images_tensor += self.process_result(response.json())
-                # images_tensor += self.process_result(RSP)
 
-            # print(f"Debug - Images tensor array:{[t.shape for t in images_tensor]}")
-            # print(f"Debug - cat tensor:{torch.cat(images_tensor, dim=0).shape}")
             merged = torch.cat(images_tensor, dim=0)
             return (merged,)
             # return super().generate_image(arguments)
@@ -425,7 +423,6 @@ class GenerateText:
 
         if response.status_code != 200:
             raise requests.exceptions.HTTPError(f"HTTP error: {response.status_code}, Response: {response.text}")
-        # print(f"Debug - text gen Response: {response} - {response.content}")
 
         json_response = response.json()
         content = json_response["choices"][0]["message"]["content"]  # theres multiple choices, but for what idk yet
