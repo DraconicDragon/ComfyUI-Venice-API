@@ -26,10 +26,12 @@ If there's no "untested" on any of the points it means it should work but there'
 ### Features
 
 - Direct integration with venice.ai's Flux and SDXL models
-- Support for flux-dev, flux-dev-uncensored, fluently-xl and pony-realism 
+- Support for flux-dev, flux-dev-uncensored, fluently-xl and pony-realis (status: 25th Jan 2025) 
+- Support for all LLMs venice.ai offers (status: 25th Jan 2025) 
 - Configurable parameters including steps, guidance scale, and dimensions
+  - including fake-ish batch size (just 2 requests after one another returned as 1 output)
 - Negative prompt support (ignored when Flux is selected)
-- Error handling and retry mechanisms
+- Error handling i guess
 
 
 ### Installation
