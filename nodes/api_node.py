@@ -8,7 +8,6 @@ import requests
 import torch
 import torchvision.transforms as transforms
 from PIL import Image
-from tenacity import retry, stop_after_attempt, wait_exponential
 
 API_ENDPOINTS = {
     "list_models": "/models",  # response type is list of strings
@@ -398,10 +397,10 @@ class GenerateText:
 
     RETURN_TYPES = ("STRING",)
     RETURN_NAMES = ("response",)
-    FUNCTION = "generate"
+    FUNCTION = "generate_text"
     CATEGORY = "venice.ai"
 
-    def execute(self, model, prompt, frequency_penalty, presence_penalty, temperature, top_p, api_key):
+    def generate_text(self, model, prompt, frequency_penalty, presence_penalty, temperature, top_p, api_key):
 
         url = "https://api.venice.ai/api/v1/chat/completions"
         payload = {
