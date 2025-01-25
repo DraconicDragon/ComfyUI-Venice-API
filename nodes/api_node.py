@@ -2,13 +2,13 @@ import base64
 import configparser
 import io
 import os
-import traceback
 
 import numpy as np
 import requests
 import torch
 import torchvision.transforms as transforms
 from PIL import Image
+from torchvision.transforms import ToPILImage, ToTensor
 
 API_ENDPOINTS = {
     "list_models": "/models",  # response type is list of strings
@@ -403,7 +403,9 @@ class GenerateText:
     FUNCTION = "generate_text"
     CATEGORY = "venice.ai"
 
-    def generate_text(self, model, system_prompt, prompt, frequency_penalty, presence_penalty, temperature, top_p, api_key):
+    def generate_text(
+        self, model, system_prompt, prompt, frequency_penalty, presence_penalty, temperature, top_p, api_key
+    ):
         os.environ["VENICE_API_KEY"] = api_key  # todo: updating nodes replaces config ini
 
         url = os.getenv("VENICE_BASE_URL") + API_ENDPOINTS["text_generate"]
@@ -428,6 +430,69 @@ class GenerateText:
         json_response = response.json()
         content = json_response["choices"][0]["message"]["content"]  # theres multiple choices, but for what idk yet
         return (content,)
+
+
+# endregion
+
+
+# region upscale img
+class UpscaleImage:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "image": ("IMAGE",),
+                "api_key": ("STRING", {"default": "your_key_here"}),
+            }
+        }
+
+    RETURN_TYPES = ("IMAGE",)
+    RETURN_NAMES = ("image",)
+    FUNCTION = "upscale_image"
+    CATEGORY = "venice.ai"
+
+    def upscale_image(self, image, api_key):
+        os.environ["VENICE_API_KEY"] = api_key  # todo: updating nodes replaces config ini
+
+        url = os.getenv("VENICE_BASE_URL") + API_ENDPOINTS["image_upscale"]
+
+        to_pil = ToPILImage()
+        pil_image = to_pil(image)  # Converts Tensor to a PIL Image
+
+        # Save the PIL image to a byte buffer in PNG format
+        byte_io = io.BytesIO()
+        pil_image.save(byte_io, format="PNG")
+        byte_io.seek(0)  # Rewind the buffer to the beginning
+
+        # Create the multipart payload
+        files = {"file": ("image.png", byte_io, "image/png")}
+
+        headers = {"Authorization": f"Bearer {os.getenv('VENICE_API_KEY')}", "Content-Type": "multipart/form-data"}
+        response = requests.request("POST", url, files=files, headers=headers)
+
+        if response.status_code != 200:
+            raise requests.exceptions.HTTPError(f"HTTP error: {response.status_code}, Response: {response.text}")
+
+        try:
+            upscaled_image = Image.open(io.BytesIO(response.content))
+
+            to_tensor = ToTensor()
+            tensor = to_tensor(upscaled_image)  # CHW format?
+            print(f"Debug - Upscaled image tensor shape: {tensor.shape}")
+
+            tensor_bhwc = tensor.permute(1, 2, 0)  # from (C, H, W) to (H, W, C)
+
+            tensor_bhwc = tensor_bhwc.to(torch.float32)
+
+            if tensor_bhwc.ndimension() == 3:  # HWC format
+                tensor_bhwc = tensor_bhwc.unsqueeze(0)  # Add batch dimension (B, H, W, C)
+
+            return (tensor_bhwc,)
+
+        except Exception as e:
+            raise requests.exceptions.HTTPError(
+                f"Failed to retrieve upscaled image. Status code: {response.status_code}, Response: {response.text}"
+            )
 
 
 # endregion
