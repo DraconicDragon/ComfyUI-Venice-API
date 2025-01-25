@@ -388,6 +388,7 @@ class GenerateText:
                         "default": "llama-3.2-3b",
                     },
                 ),
+                "system_prompt": ("STRING", {"default": "", "multiline": True}),
                 "prompt": ("STRING", {"default": "", "multiline": True}),
                 "frequency_penalty": ("FLOAT", {"default": 1.5, "min": 0.0, "max": 2.0, "step": 0.1}),
                 "presence_penalty": ("FLOAT", {"default": 1.5, "min": 0.0, "max": 2.0, "step": 0.1}),
@@ -402,14 +403,14 @@ class GenerateText:
     FUNCTION = "generate_text"
     CATEGORY = "venice.ai"
 
-    def generate_text(self, model, prompt, frequency_penalty, presence_penalty, temperature, top_p, api_key):
+    def generate_text(self, model, system_prompt, prompt, frequency_penalty, presence_penalty, temperature, top_p, api_key):
         os.environ["VENICE_API_KEY"] = api_key  # todo: updating nodes replaces config ini
 
         url = os.getenv("VENICE_BASE_URL") + API_ENDPOINTS["text_generate"]
         payload = {
             "model": model,
             "messages": [
-                {"role": "system", "content": ""},
+                {"role": "system", "content": system_prompt},
                 {"role": "user", "content": prompt},
             ],
             "frequency_penalty": frequency_penalty,
