@@ -26,15 +26,15 @@ If there's no "untested" on any of the points it means it should work but there'
 ### Features
 
 - Direct integration with venice.ai's Flux and SDXL models
-- Support for flux-dev, flux-dev-uncensored, fluently-xl and pony-realis (status: 25th Jan 2025) 
-- Support for all LLMs venice.ai offers (status: 25th Jan 2025) 
+- Support for flux-dev, flux-dev-uncensored, fluently-xl and pony-realis (status: 25th Jan 2025)
+- Support for all LLMs venice.ai offers (status: 25th Jan 2025)
 - Configurable parameters including steps, guidance scale, and dimensions
   - including fake-ish batch size (just 2 requests after one another returned as 1 output)
 - Negative prompt support (ignored when Flux is selected)
 - Error handling i guess
 
 
-### Installation
+### Installation - these instructions are a mess
 
 1. Clone this repository into your ComfyUI custom_nodes directory:
 ```bash
@@ -42,7 +42,7 @@ cd ComfyUI/custom_nodes
 git clone https://github.com/DraconicDragon/ComfyUI-Venice-API.git
 ```
 
-2. Install the required dependencies: (this might be done by comfyui automatically on restart?)
+2. Install the required dependencies: (this might be done by comfyui automatically on restart already?)
 ```bash
 pip install -r requirements.txt
 ```
@@ -52,6 +52,7 @@ OR From the Comfyui Folder (this one is usually preferred if you have portable e
  ./python_embeded\python.exe -m pip install -r ComfyUI\custom_nodes\ComfyUI-Venice-API\requirements.txt
 ```
 
+outdated, configure in node, in future this will likely be in comfy settings
 3. Edit the `config.ini` file in the root directory and add venice.ai API key:
 ```ini
 [API]
@@ -62,12 +63,13 @@ BASE_URL = https://api.venice.ai/api/v1
 ### Configuration
 
 1. Get your API key from [venice.ai](https://venice.ai)
-2. Add your API key to the configuration file
+2. ~~Add your API key to the configuration file~~ yeah no just add it in the nodes
 
 ### Usage
 
 1. Start ComfyUI
-2. Find the "Generate Image (Venice)" in the node browser
+2. Find the "Generate Image (Venice)" in the node browser (double-click empty space in ComfyUI)
+2.1. or the Generate Text (Venice) node
 3. Configure the parameters:
    - Prompt: Your image generation prompt
    - Negative Prompt: Elements to avoid in the generation
@@ -86,8 +88,8 @@ For detailed usage instructions, see [USAGE.md](USAGE.md)
 | prompt          | string  | -         | ""      | Main generation prompt     |
 | negative_prompt | string  | -         | ""      | Elements to avoid          |
 | steps           | integer | 1-30      | 20      | Number of generation steps |
-| width           | integer | 512-2048  | 1024    | Image width                |
-| height          | integer | 512-2048  | 1024    | Image height               |
+| width           | integer | 512-1280?  | 1024    | Image width                |
+| height          | integer | 512-1280?  | 1024    | Image height               |
 | seed            | integer | 0-MAX_INT | 0       | Generation seed            |
 | cfg             | float   | 0.1-15.0  | 3.5     | Guidance scale             |
 
@@ -116,4 +118,4 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 todo
 
-i never installed these nodes lol
+i never installed these nodes lol (i did now)
