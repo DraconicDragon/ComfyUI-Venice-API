@@ -398,6 +398,7 @@ class GenerateText:
                 "presence_penalty": ("FLOAT", {"default": 1.5, "min": 0.0, "max": 2.0, "step": 0.1}),
                 "temperature": ("FLOAT", {"default": 0.5, "min": 0.0, "max": 2.0, "step": 0.1}),
                 "top_p": ("FLOAT", {"default": 0.9, "min": 0.0, "max": 1.0, "step": 0.1}),
+                "api_key": ("STRING", {"default": "your_key_here"}),
             }
         }
 
@@ -406,7 +407,7 @@ class GenerateText:
     FUNCTION = "generate"
     CATEGORY = "venice.ai"
 
-    def execute(self, model, prompt, frequency_penalty, presence_penalty, temperature, top_p):
+    def execute(self, model, prompt, frequency_penalty, presence_penalty, temperature, top_p, api_key):
 
         url = "https://api.venice.ai/api/v1/chat/completions"
         payload = {
@@ -419,10 +420,9 @@ class GenerateText:
             "presence_penalty": presence_penalty,
             "temperature": temperature,
             "top_p": top_p,
-            "api_key": ("STRING", {"default": "your_key_here"}),
         }
         headers = {"Authorization": f"Bearer {os.getenv('VENICE_API_KEY')}", "Content-Type": "application/json"}
-        response = requests.request("POST", url, json=payload, headers=headers)
+        response = requests.request("POST", url, json=payload, headers=headers).json()
         content = response["choices"][0]["message"]["content"]  # theres multiple choices, but for what idk yet
         return (content,)
 
