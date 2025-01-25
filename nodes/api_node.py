@@ -2,6 +2,7 @@ import base64
 import configparser
 import io
 import os
+import traceback
 
 import numpy as np
 import requests
@@ -86,7 +87,7 @@ class GenerateImageBase:
             if isinstance(result, dict) and "images" in result:
                 img_data = result["images"][0]  # Only first image is returned because only 1 is possible rn
             else:
-                raise ValueError("Unexpected response format")
+                raise Exception(f"Error, unexpected response: {str(e)}") from e
 
             img_bytes = base64.b64decode(img_data)
             img = Image.open(io.BytesIO(img_bytes)).convert("RGB")
@@ -101,8 +102,7 @@ class GenerateImageBase:
             return (img_tensor,)
 
         except Exception as e:
-            print(f"Error processing image result: {str(e)}")
-            return self.create_blank_image()
+            raise Exception(f"Error processing image result: {str(e)}") from e
 
     def create_blank_image(self):
         blank_img = Image.new("RGB", (512, 512), color="black")
@@ -131,8 +131,7 @@ class GenerateImageBase:
         #     )
         #     return self.process_result(response)
         # except Exception as e:
-        #     print(f"Error generating image: {str(e)}")
-        #     return self.create_blank_image()
+        #     raise Exception(f"Error processing image result: {str(e)}") from e
         # todo: is unsued rn
         try:
             payload = {
@@ -155,8 +154,7 @@ class GenerateImageBase:
             return self.process_result(response.json())
 
         except Exception as e:
-            print(f"Error generating image: {str(e)}")
-            return self.create_blank_image()
+            raise Exception(f"Error processing image result: {str(e)}") from e
 
 
 class GenerateImage(GenerateImageBase):
@@ -304,7 +302,7 @@ class GenerateImage(GenerateImageBase):
         os.environ["VENICE_API_KEY"] = api_key  # todo: updating nodes replaces config ini
 
         if model in ["flux-dev", "flux-dev-uncensored"]:
-            print("VeniceAPI: Ignoring negative prompt for flux-dev and flux-dev-uncensored models")
+            print(f"VeniceAPI INFO: Ignoring negative prompt for {model}.")
             neg_prompt = ""
 
         images_tensor = ()  # empty list
@@ -325,7 +323,7 @@ class GenerateImage(GenerateImageBase):
 
         try:
             # Override the base class method to handle the response directly
-            self.check_multiple_of_32(width, height)
+            self.check_multiple_of_32(width, height)  # todo: make this be validate node instead
 
             payload = {
                 "model": model,
@@ -350,8 +348,12 @@ class GenerateImage(GenerateImageBase):
             for i in range(batch_size):
                 payload["seed"] = seed + i
                 response = requests.request("POST", url, json=payload, headers=headers)
+
                 if response.status_code != 200:
-                    raise ValueError(f"Error in response: {response} and {response.content}")  # {response.content}
+                    raise requests.exceptions.HTTPError(
+                        f"HTTP error: {response.status_code}, Response: {response.text}"
+                    )
+
                 images_tensor += self.process_result(response.json())
                 # images_tensor += self.process_result(RSP)
 
@@ -362,8 +364,7 @@ class GenerateImage(GenerateImageBase):
             # return super().generate_image(arguments)
 
         except Exception as e:
-            print(f"Error generating image: {str(e)}")
-            return self.create_blank_image()
+            raise Exception(f"Error processing image result: {str(e)}") from e
 
 
 # endregion
@@ -420,8 +421,8 @@ class GenerateText:
         response = requests.request("POST", url, json=payload, headers=headers)
 
         if response.status_code != 200:
-            raise ValueError(f"Error in response: {response} and {response.content}")
-        print(f"Debug - text gen Response: {response} - {response.content}")
+            raise requests.exceptions.HTTPError(f"HTTP error: {response.status_code}, Response: {response.text}")
+        # print(f"Debug - text gen Response: {response} - {response.content}")
 
         json_response = response.json()
         content = json_response["choices"][0]["message"]["content"]  # theres multiple choices, but for what idk yet
