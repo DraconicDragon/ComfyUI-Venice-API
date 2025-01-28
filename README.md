@@ -1,6 +1,6 @@
 # ComfyUI venice.ai Flux/SDXL/LLM API Nodes
 
-A custom node implementation for ComfyUI that integrates with venice.ai's Flux and SDXL image generation models (and upscale + text gen). This project is adapted from [ComfyUI-FLUX-TOGETHER-API](https://github.com/BZcreativ/ComfyUI-FLUX-TOGETHER-API) to work with the venice.ai API.
+An unofficial custom node implementation for ComfyUI that integrates with venice.ai's Flux and SDXL image generation models (and upscale + text gen). This project is adapted from [ComfyUI-FLUX-TOGETHER-API](https://github.com/BZcreativ/ComfyUI-FLUX-TOGETHER-API) to work with the venice.ai API.
 
 Disclaimer: I just made this on a whim because someone wanted something similar to Together.AI custom nodes but have them use venice instead and also, I don't have access to any API keys for any of the mentioned services. i guess it should work, sometimes?
 
