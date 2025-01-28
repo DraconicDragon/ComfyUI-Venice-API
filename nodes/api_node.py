@@ -20,39 +20,39 @@ API_ENDPOINTS = {
 
 # NOTE: redundant stuff right now and if comfy settings is used instead but leaving here instead maybe i need it
 # hashtag hoarder mindset or something
-class ConfigLoader:
-    def __init__(self):
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        parent_dir = os.path.dirname(current_dir)
-        config_path = os.path.join(parent_dir, "config.ini")
-        self.config = configparser.ConfigParser()
-        self.config.read(config_path)
-        self.set_api_key()
-        self.set_base_url()
+# class ConfigLoader:
+# def __init__(self):
+#     current_dir = os.path.dirname(os.path.abspath(__file__))
+#     parent_dir = os.path.dirname(current_dir)
+#     config_path = os.path.join(parent_dir, "config.ini")
+#     self.config = configparser.ConfigParser()
+#     self.config.read(config_path)
+#     self.set_api_key()
+#     self.set_base_url()
 
-    def get_config_key(self, section, key):
-        try:
-            return self.config[section][key]
-        except KeyError:
-            raise KeyError(f"{key} not found in section {section} of config file.")
+# def get_config_key(self, section, key):
+#     try:
+#         return self.config[section][key]
+#     except KeyError:
+#         raise KeyError(f"{key} not found in section {section} of config file.")
 
-    def set_api_key(self):
-        try:
-            api_key = self.get_config_key("API", "API_KEY")
-            os.environ["VENICE_API_KEY"] = api_key
-        except KeyError as e:
-            print(f"Error: {str(e)}")
+# def set_api_key(self):
+#     try:
+#         api_key = self.get_config_key("API", "API_KEY")
+#         os.environ["VENICE_API_KEY"] = api_key
+#     except KeyError as e:
+#         print(f"Error: {str(e)}")
 
-    # load base url from config
-    def set_base_url(self):
-        try:
-            base_url = self.get_config_key("API", "BASE_URL")
-            os.environ["VENICE_BASE_URL"] = base_url
-        except KeyError as e:
-            print(f"Error: {str(e)}")
+# # load base url from config
+# def set_base_url(self):
+#     try:
+#         base_url = self.get_config_key("API", "BASE_URL")
+#         os.environ["VENICE_BASE_URL"] = base_url
+#     except KeyError as e:
+#         print(f"Error: {str(e)}")
 
 
-config_loader = ConfigLoader()
+# config_loader = ConfigLoader()
 
 
 # region image gen
