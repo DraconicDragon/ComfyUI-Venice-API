@@ -17,7 +17,7 @@ API_ENDPOINTS = {
     "text_generate": "/chat/completions",  # has much info, text response is in choices: content, can have multiple choices apparently but dosnt seem to be utilized
 }
 
-
+os.environ["VENICE_BASE_URL"] = "https://api.venice.ai/api/v1"
 # NOTE: redundant stuff right now and if comfy settings is used instead but leaving here instead maybe i need it
 # hashtag hoarder mindset or something
 # class ConfigLoader:
