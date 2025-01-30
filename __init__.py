@@ -1,8 +1,8 @@
-import importlib.util
 import importlib
+import importlib.util
 
 node_list = [
-"api_node",
+    "api_node",
 ]
 
 NODE_CLASS_MAPPINGS = {}
@@ -15,4 +15,7 @@ for module_name in node_list:
     NODE_DISPLAY_NAME_MAPPINGS = {**NODE_DISPLAY_NAME_MAPPINGS, **imported_module.NODE_DISPLAY_NAME_MAPPINGS}
 
 
-__all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS"]
+WEB_DIRECTORY = "./js"
+
+
+__all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS", "WEB_DIRECTORY"]

@@ -566,49 +566,49 @@ class UpscaleImage:
 # endregion
 
 
-class TestNode:
+class CharCountTextBox:
     @classmethod
     def INPUT_TYPES(s):
         return {
             "required": {
-                "images_A": ("IMAGE",),
-                "images_B": ("IMAGE",),
+                "input_text": ("STRING", {"default": "", "multiline": True}),
             }
         }
 
     CATEGORY = "venice.ai"
 
-    RETURN_TYPES = ("IMAGE",)
-    RETURN_NAMES = ("IMAGE",)
-    FUNCTION = "merge"
+    RETURN_TYPES = ("STRING",)
+    RETURN_NAMES = ("text",)
+    FUNCTION = "return_same_text"
 
-    def merge(self, images_A, images_B):
-        images = []
-        print(f"images_A: {images_A.shape}")
-        print(f"images_B: {images_B.shape}")
+    def return_same_text(self, input_text):
 
-        transform = transforms.ToPILImage()
-        images_A = images_A.permute(0, 3, 1, 2)
-        images_B = images_B.permute(0, 3, 1, 2)
-        imgA = transform(images_A[0])
-        imgB = transform(images_B[0])
+        return {"ui": {"text": input_text}, "result": (input_text,)}
 
-        img_array = np.array(imgA).astype(np.float32) / 255.0
-        img_tensor = torch.from_numpy(img_array).unsqueeze(0)
-        print(f"Debug - Image tensor shape: {img_tensor.shape}")
-        images.append(img_tensor)
 
-        img_array = np.array(imgB).astype(np.float32) / 255.0
-        img_tensor = torch.from_numpy(img_array).unsqueeze(0)
-        print(f"Debug - Image tensor shape: {img_tensor.shape}")
-        images.append(img_tensor)
-        all_images = torch.cat(images, dim=0)
-        print(f"all_images: {all_images.shape}")
-        return (all_images,)
+class TestNode:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "input_text": ("STRING", {"default": "Hello, world!", "multiline": True}),
+            }
+        }
+
+    CATEGORY = "venice.ai"
+
+    RETURN_TYPES = ("STRING",)
+    RETURN_NAMES = ("text",)
+    FUNCTION = "test"
+
+    def test(self, input_text):
+
+        return (os.getenv("VENICE_API_KEY_CS"),)  # ignore
 
 
 NODE_CLASS_MAPPINGS = {
     "testaaaaa": TestNode,
+    "CharCountTextBox": CharCountTextBox,
     "GenerateImage_VENICE": GenerateImage,
     "UpscaleImage_VENICE": UpscaleImage,
     "GenerateText_VENICE": GenerateText,
@@ -618,6 +618,7 @@ NODE_CLASS_MAPPINGS = {
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "testaaaaa": "TestAAAAA",
+    "CharCountTextBox": "Textbox with letter count",
     "GenerateImage_VENICE": "Generate Image (Venice)",
     "UpscaleImage_VENICE": "Upscale Image (Venice)",
     "GenerateText_VENICE": "Generate Text (Venice)",
