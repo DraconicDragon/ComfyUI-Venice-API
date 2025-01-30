@@ -618,7 +618,7 @@ NODE_CLASS_MAPPINGS = {
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "testaaaaa": "TestAAAAA",
-    "CharCountTextBox": "Textbox with letter count",
+    "CharCountTextBox": "Textbox w/ char count",
     "GenerateImage_VENICE": "Generate Image (Venice)",
     "UpscaleImage_VENICE": "Upscale Image (Venice)",
     "GenerateText_VENICE": "Generate Text (Venice)",

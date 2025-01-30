@@ -11,7 +11,7 @@ app.registerExtension({
                 onConfigure?.apply(this, arguments);
                 
                 // Button used like a label
-                let charCountWidget = { type: "button", name: "Char count: 0", callback: null };
+                let charCountWidget = { type: "button", name: "Character count: 0", callback: null };
                 this.widgets.splice(0, 0, charCountWidget); // Insert at the top of the widget list
                 
                 // Poll for changes to input_text
@@ -20,7 +20,7 @@ app.registerExtension({
                     const inputText = this.widgets?.find(w => w.name === "input_text")?.value || "";
                     if (inputText !== lastText) {
                         lastText = inputText;
-                        charCountWidget.name = `Char count: ${inputText.length}`;
+                        charCountWidget.name = `Character count: ${inputText.length}`;
                         this.setDirtyCanvas(true); // Refresh the canvas to update UI
                     }
                 }, 1500); // Check every 500ms, 0 clue if good approach or not but it works
