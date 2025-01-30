@@ -11,7 +11,8 @@ app.registerExtension({
                 onConfigure?.apply(this, arguments);
                 
                 // Button used like a label
-                let charCountWidget = this.addWidget("button", "Char count: 0", "", null);
+                let charCountWidget = { type: "button", name: "Char count: 0", callback: null };
+                this.widgets.splice(0, 0, charCountWidget); // Insert at the top of the widget list
                 
                 // Poll for changes to input_text
                 let lastText = "";
