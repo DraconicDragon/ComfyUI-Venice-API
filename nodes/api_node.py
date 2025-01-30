@@ -585,7 +585,8 @@ class CharCountTextBox:
 
         return {"ui": {"text": input_text}, "result": (input_text,)}
 
-
+# todo: https://docs.comfy.org/essentials/comms_overview
+# todo: https://docs.comfy.org/essentials/comms_messages
 class TestNode:
     @classmethod
     def INPUT_TYPES(s):
