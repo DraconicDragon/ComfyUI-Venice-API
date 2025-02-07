@@ -7,11 +7,14 @@ app.registerExtension({
             // Store the original onConfigure method
             const onConfigure = nodeType.prototype.onConfigure;
 
-            nodeType.prototype.onConfigure = function () {
+            nodeType.prototype.onNodeCreated = function () {
                 onConfigure?.apply(this, arguments);
                 
                 // Button used like a label
-                let charCountWidget = { type: "button", name: "Character count: 0", callback: null };
+                let charCountWidget = { type: "button", name: "Character count: 0", callback: () => {
+                    alert("u stinky");
+                    alert(`aaaa ${app.extensionManager.setting.get('example.number')}`);
+                } };
                 this.widgets.splice(0, 0, charCountWidget); // Insert at the top of the widget list
                 
                 // Poll for changes to input_text
