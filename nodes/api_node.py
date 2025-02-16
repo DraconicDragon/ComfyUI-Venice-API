@@ -10,51 +10,7 @@ import torchvision.transforms as transforms
 from PIL import Image
 from torchvision.transforms import ToPILImage, ToTensor
 
-API_ENDPOINTS = {
-    "list_models": "/models",  # response type is list of strings
-    "image_generate": "/image/generate",  # response type is json with images key, each item is image in base64
-    "upscale_image": "/image/upscale",  # NOTE: apparently doesnt even work yet? idk; response type is image/png file, content type is multipart/form-data
-    "text_generate": "/chat/completions",  # has much info, text response is in choices: content, can have multiple choices apparently but dosnt seem to be utilized
-}
-
-os.environ["VENICE_BASE_URL"] = "https://api.venice.ai/api/v1"
-# region a
-# NOTE: redundant stuff right now and if comfy settings is used instead but leaving here instead maybe i need it
-# hashtag hoarder mindset or something
-# class ConfigLoader:
-# def __init__(self):
-#     current_dir = os.path.dirname(os.path.abspath(__file__))
-#     parent_dir = os.path.dirname(current_dir)
-#     config_path = os.path.join(parent_dir, "config.ini")
-#     self.config = configparser.ConfigParser()
-#     self.config.read(config_path)
-#     self.set_api_key()
-#     self.set_base_url()
-
-# def get_config_key(self, section, key):
-#     try:
-#         return self.config[section][key]
-#     except KeyError:
-#         raise KeyError(f"{key} not found in section {section} of config file.")
-
-# def set_api_key(self):
-#     try:
-#         api_key = self.get_config_key("API", "API_KEY")
-#         os.environ["VENICEAI_API_KEY"] = api_key
-#     except KeyError as e:
-#         print(f"Error: {str(e)}")
-
-# # load base url from config
-# def set_base_url(self):
-#     try:
-#         base_url = self.get_config_key("API", "BASE_URL")
-#         os.environ["VENICE_BASE_URL"] = base_url
-#     except KeyError as e:
-#         print(f"Error: {str(e)}")
-
-
-# config_loader = ConfigLoader()
-# endregion
+from ..globals import API_ENDPOINTS, VENICEAI_BASE_URL
 
 
 # region image gen
@@ -62,30 +18,6 @@ class GenerateImageBase:
     RETURN_TYPES = ("IMAGE",)
     FUNCTION = "generate_image"
     CATEGORY = "venice.ai"
-
-    def get_models(self, model_type: str) -> list:  # model_type = image or text model
-        # todo: needs rework, find way to run efficiently without each node or similar
-        try:
-            headers = {"Authorization": f"Bearer {os.getenv('VENICEAI_API_KEY')}"}
-            url = os.getenv("VENICE_BASE_URL") + API_ENDPOINTS["list_models"]
-            response = requests.get(url, headers=headers).json()
-
-            print(f"Debug - Response: {response}")
-            # print(f"Debug - Response type: {type(response)}")
-
-            if not isinstance(response, dict) or "data" not in response or not isinstance(response["data"], list):
-                raise ValueError("Unexpected API response format")
-
-            return [model["id"] for model in response["data"] if model.get("type") == model_type]
-
-        except Exception as e:
-            print(f"Could not fetch models: {str(e)}\nAttempting to switch to default selection...")
-            if model_type == "image":
-                return ["flux-dev", "flux-dev-uncensored", "fluently-xl", "pony-realism"]
-            elif model_type == "text":
-                return ["dolphin-2.9.2-qwen2-72b"]
-            else:
-                return ["check console"]  # dont know which models supported or if any
 
     def process_result(self, result):
         try:
@@ -154,7 +86,7 @@ class GenerateImageBase:
             }
             headers = {"Authorization": f"Bearer {os.getenv('VENICEAI_API_KEY')}", "Content-Type": "application/json"}
 
-            url = os.getenv("VENICE_BASE_URL") + API_ENDPOINTS["image_generate"]
+            url = VENICEAI_BASE_URL + API_ENDPOINTS["image_generate"]
             response = requests.request("POST", url, json=payload, headers=headers)
             return self.process_result(response.json())
 
@@ -333,7 +265,7 @@ class GenerateImage(GenerateImageBase):
             self.check_multiple_of_32(width, height)  # todo: make this be validate node instead
 
             headers = {"Authorization": f"Bearer {os.getenv('VENICEAI_API_KEY')}", "Content-Type": "application/json"}
-            url = os.getenv("VENICE_BASE_URL") + API_ENDPOINTS["image_generate"]
+            url = VENICEAI_BASE_URL + API_ENDPOINTS["image_generate"]
 
             payload = {
                 "model": model,
@@ -409,7 +341,7 @@ class GenerateText:
     CATEGORY = "venice.ai"
 
     def generate_text(self, model, system_prompt, prompt, frequency_penalty, presence_penalty, temperature, top_p):
-        url = os.getenv("VENICE_BASE_URL") + API_ENDPOINTS["text_generate"]
+        url = VENICEAI_BASE_URL + API_ENDPOINTS["text_generate"]
         payload = {
             "model": model,
             "messages": [
@@ -450,15 +382,22 @@ class UpscaleImage:
 
     RETURN_TYPES = ("IMAGE",)
     RETURN_NAMES = ("image",)
-    FUNCTION = "upscale_image"
+    FUNCTION = "upscale"
     CATEGORY = "venice.ai"
 
-    def upscale_image(self, image):
+    def upscale(self, image):
 
-        url = os.getenv("VENICE_BASE_URL") + API_ENDPOINTS["image_upscale"]
+        url = VENICEAI_BASE_URL + API_ENDPOINTS["upscale_image"]
+
+        # Ensure the tensor is in the correct format (C, H, W) and has 3 channels
+        if image.dim() == 4 and image.shape[0] == 1:
+            image = image.squeeze(0)
+
+        if image.shape[0] > 3:
+            image = image[:3, :, :]  # Keep only the first 3 channels (RGB)
 
         to_pil = ToPILImage()
-        pil_image = to_pil(image)  # Converts Tensor to a PIL Image
+        pil_image = to_pil(image)
 
         # Save the PIL image to a byte buffer in PNG format
         byte_io = io.BytesIO()
