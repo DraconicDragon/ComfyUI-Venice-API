@@ -309,6 +309,7 @@ class GenerateImage(GenerateImageBase):
         hide_watermark,
         seed=-1,
     ):
+        images_tensor = ()  # empty tuple for tensors
 
         if model in ["flux-dev", "flux-dev-uncensored"]:
             print(f"VeniceAPI INFO: Ignoring negative prompt for {model}.")
