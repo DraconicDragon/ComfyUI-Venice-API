@@ -18,6 +18,7 @@ API_ENDPOINTS = {
 }
 
 os.environ["VENICE_BASE_URL"] = "https://api.venice.ai/api/v1"
+# region a
 # NOTE: redundant stuff right now and if comfy settings is used instead but leaving here instead maybe i need it
 # hashtag hoarder mindset or something
 # class ConfigLoader:
@@ -39,7 +40,7 @@ os.environ["VENICE_BASE_URL"] = "https://api.venice.ai/api/v1"
 # def set_api_key(self):
 #     try:
 #         api_key = self.get_config_key("API", "API_KEY")
-#         os.environ["VENICE_API_KEY"] = api_key
+#         os.environ["VENICEAI_API_KEY"] = api_key
 #     except KeyError as e:
 #         print(f"Error: {str(e)}")
 
@@ -53,6 +54,7 @@ os.environ["VENICE_BASE_URL"] = "https://api.venice.ai/api/v1"
 
 
 # config_loader = ConfigLoader()
+# endregion
 
 
 # region image gen
@@ -64,7 +66,7 @@ class GenerateImageBase:
     def get_models(self, model_type: str) -> list:  # model_type = image or text model
         # todo: needs rework, find way to run efficiently without each node or similar
         try:
-            headers = {"Authorization": f"Bearer {os.getenv('VENICE_API_KEY')}"}
+            headers = {"Authorization": f"Bearer {os.getenv('VENICEAI_API_KEY')}"}
             url = os.getenv("VENICE_BASE_URL") + API_ENDPOINTS["list_models"]
             response = requests.get(url, headers=headers).json()
 
@@ -150,7 +152,7 @@ class GenerateImageBase:
                 "cfg_scale": arguments["cfg_scale"],
                 "style_preset": arguments["style_preset"],
             }
-            headers = {"Authorization": f"Bearer {os.getenv('VENICE_API_KEY')}", "Content-Type": "application/json"}
+            headers = {"Authorization": f"Bearer {os.getenv('VENICEAI_API_KEY')}", "Content-Type": "application/json"}
 
             url = os.getenv("VENICE_BASE_URL") + API_ENDPOINTS["image_generate"]
             response = requests.request("POST", url, json=payload, headers=headers)
@@ -282,7 +284,6 @@ class GenerateImage(GenerateImageBase):
                     {"default": "none"},
                 ),
                 "hide_watermark": ("BOOLEAN", {"default": True}),
-                "api_key": ("STRING", {"default": "your_key_here"}),
             },
             "optional": {"seed": ("INT", {"default": -1})},
         }
@@ -299,12 +300,8 @@ class GenerateImage(GenerateImageBase):
         guidance,
         style_preset,
         hide_watermark,
-        api_key,
         seed=-1,
     ):
-        os.environ["VENICE_API_KEY"] = api_key  # todo: make it set in settings
-
-        images_tensor = ()  # empty tuple for tensors
 
         if model in ["flux-dev", "flux-dev-uncensored"]:
             print(f"VeniceAPI INFO: Ignoring negative prompt for {model}.")
@@ -327,7 +324,7 @@ class GenerateImage(GenerateImageBase):
         try:
             self.check_multiple_of_32(width, height)  # todo: make this be validate node instead
 
-            headers = {"Authorization": f"Bearer {os.getenv('VENICE_API_KEY')}", "Content-Type": "application/json"}
+            headers = {"Authorization": f"Bearer {os.getenv('VENICEAI_API_KEY')}", "Content-Type": "application/json"}
             url = os.getenv("VENICE_BASE_URL") + API_ENDPOINTS["image_generate"]
 
             payload = {
@@ -392,7 +389,6 @@ class GenerateText:
                 "presence_penalty": ("FLOAT", {"default": 1.5, "min": 0.0, "max": 2.0, "step": 0.1}),
                 "temperature": ("FLOAT", {"default": 0.5, "min": 0.0, "max": 2.0, "step": 0.1}),
                 "top_p": ("FLOAT", {"default": 0.9, "min": 0.0, "max": 1.0, "step": 0.1}),
-                "api_key": ("STRING", {"default": "your_key_here"}),
             }
         }
 
@@ -401,11 +397,7 @@ class GenerateText:
     FUNCTION = "generate_text"
     CATEGORY = "venice.ai"
 
-    def generate_text(
-        self, model, system_prompt, prompt, frequency_penalty, presence_penalty, temperature, top_p, api_key
-    ):
-        os.environ["VENICE_API_KEY"] = api_key  # todo: make it set in settings
-
+    def generate_text(self, model, system_prompt, prompt, frequency_penalty, presence_penalty, temperature, top_p):
         url = os.getenv("VENICE_BASE_URL") + API_ENDPOINTS["text_generate"]
         payload = {
             "model": model,
@@ -418,7 +410,7 @@ class GenerateText:
             "temperature": temperature,
             "top_p": top_p,
         }
-        headers = {"Authorization": f"Bearer {os.getenv('VENICE_API_KEY')}", "Content-Type": "application/json"}
+        headers = {"Authorization": f"Bearer {os.getenv('VENICEAI_API_KEY')}", "Content-Type": "application/json"}
         response = requests.request("POST", url, json=payload, headers=headers)
 
         if response.status_code != 200:
@@ -442,7 +434,6 @@ class UpscaleImage:
         return {
             "required": {
                 "image": ("IMAGE",),
-                "api_key": ("STRING", {"default": "your_key_here"}),
             }
         }
 
@@ -451,8 +442,7 @@ class UpscaleImage:
     FUNCTION = "upscale_image"
     CATEGORY = "venice.ai"
 
-    def upscale_image(self, image, api_key):
-        os.environ["VENICE_API_KEY"] = api_key  # todo: make it set in settings
+    def upscale_image(self, image):
 
         url = os.getenv("VENICE_BASE_URL") + API_ENDPOINTS["image_upscale"]
 
@@ -467,7 +457,7 @@ class UpscaleImage:
         # Create the multipart payload
         files = {"file": ("image.png", byte_io, "image/png")}
 
-        headers = {"Authorization": f"Bearer {os.getenv('VENICE_API_KEY')}", "Content-Type": "multipart/form-data"}
+        headers = {"Authorization": f"Bearer {os.getenv('VENICEAI_API_KEY')}", "Content-Type": "multipart/form-data"}
         response = requests.request("POST", url, files=files, headers=headers)
 
         if response.status_code != 200:
@@ -585,30 +575,9 @@ class CharCountTextBox:
 
         return {"ui": {"text": input_text}, "result": (input_text,)}
 
-# todo: https://docs.comfy.org/essentials/comms_overview
-# todo: https://docs.comfy.org/essentials/comms_messages
-class TestNode:
-    @classmethod
-    def INPUT_TYPES(s):
-        return {
-            "required": {
-                "input_text": ("STRING", {"default": "Hello, world!", "multiline": True}),
-            }
-        }
-
-    CATEGORY = "venice.ai"
-
-    RETURN_TYPES = ("STRING",)
-    RETURN_NAMES = ("text",)
-    FUNCTION = "test"
-
-    def test(self, input_text):
-
-        return (os.getenv("VENICE_API_KEY_CS"),)  # ignore
-
 
 NODE_CLASS_MAPPINGS = {
-    "testaaaaa": TestNode,
+    # "testaaaaa": TestNode,
     "CharCountTextBox": CharCountTextBox,
     "GenerateImage_VENICE": GenerateImage,
     "UpscaleImage_VENICE": UpscaleImage,
@@ -618,7 +587,7 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "testaaaaa": "TestAAAAA",
+    # "testaaaaa": "TestAAAAA",
     "CharCountTextBox": "Textbox w/ char count",
     "GenerateImage_VENICE": "Generate Image (Venice)",
     "UpscaleImage_VENICE": "Upscale Image (Venice)",
