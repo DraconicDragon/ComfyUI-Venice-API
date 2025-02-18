@@ -18,7 +18,6 @@ styles_list_path = data_dir / "styles_list.json"
 
 async def fetch_styles_list():
     try:
-        print("testestestestestestestetsetestsetsetsetsetset")
         headers = {"Authorization": f"Bearer {os.getenv('VENICEAI_API_KEY')}"}
         url = f"{VENICEAI_BASE_URL}{API_ENDPOINTS['list_styles']}"
 
