@@ -18,11 +18,11 @@ all_model_list_path = data_dir / "all_model_list.json"
 
 
 # this can update with ComfyUI-HotReloadHack
-async def fetch_model_list(model_type: str) -> list:
+async def fetch_model_list():
     try:
         headers = {"Authorization": f"Bearer {os.getenv('VENICEAI_API_KEY')}"}
         url = f"{VENICEAI_BASE_URL}{API_ENDPOINTS['list_models']}"
-        params = {"type": model_type}
+        params = {"type": "all"}
 
         response = requests.get(url, headers=headers, params=params)
         response.raise_for_status()  # Raises HTTPError for bad responses
@@ -45,7 +45,7 @@ async def fetch_model_list(model_type: str) -> list:
         "image": ["flux-dev", "flux-dev-uncensored", "fluently-xl", "pony-realism", "lustify-xl"],
         "text": ["llama-3.3-70b"],
     }
-    return default_models.get(model_type, ["something seems to have gone wrong, check console"])
+    return default_models
 
 
 async def humanize_name(model_id: str) -> str:
@@ -62,11 +62,11 @@ async def humanize_name(model_id: str) -> str:
 
 
 async def update_model_list():
-    img_model_json = await fetch_model_list("image")
-    txt_model_json = await fetch_model_list("text")
-    print("hiaaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-    merged_json = {"object": "list", "data": img_model_json.get("data", []) + txt_model_json.get("data", [])}
-
+    # img_model_json = await fetch_model_list("image")
+    # txt_model_json = await fetch_model_list("text")
+    # merged_json = {"object": "list", "data": img_model_json.get("data", []) + txt_model_json.get("data", [])}
+    merged_json = await fetch_model_list()
+    print("testicles")
     # Validating response structure
     if not isinstance(merged_json, dict) or "data" not in merged_json:
         raise ValueError("Unexpected API response format")
