@@ -30,7 +30,8 @@ async def fetch_styles_list():
         response_data.pop("object", None)
 
         response_data["data"] = sorted(response_data.get("data", []))
-        response_data["data"] = response_data.get("data", []).prepend("none")
+        response_data["data"].insert(0, "none")
+
         with open(styles_list_path, "w") as f:
             json.dump(response_data, f, indent=2)
 
