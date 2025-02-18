@@ -361,7 +361,7 @@ class UpscaleImage:
 
             to_tensor = ToTensor()
             tensor = to_tensor(upscaled_image)  # CHW format?
-            print(f"Debug - Upscaled image tensor shape: {tensor.shape}")
+            #print(f"Debug - Upscaled image tensor shape: {tensor.shape}")
             tensor_bhwc = tensor.permute(1, 2, 0)  # from (C, H, W) to (H, W, C)
             tensor_bhwc = tensor_bhwc.to(torch.float32)
 
