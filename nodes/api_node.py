@@ -58,7 +58,7 @@ class GenerateImage(GenerateImageBase):
         return {
             "required": {
                 "model": (
-                    "*",
+                    "COMBO",
                     {"default": "flux-dev"},
                 ),
                 "prompt": ("STRING", {"default": "A flying cat made of lettuce", "multiline": True}),
@@ -91,7 +91,7 @@ class GenerateImage(GenerateImageBase):
                 "batch_size": ("INT", {"default": 1, "min:": 1, "max": 4}),
                 "steps": ("INT", {"default": 20, "min": 1, "max": 30}),
                 "guidance": ("FLOAT", {"default": 3.0, "min": 0.1, "max": 15.0}),
-                "style_preset": ("*", {"default": "none"}),
+                "style_preset": ("COMBO", {"default": "none"}),
                 "hide_watermark": ("BOOLEAN", {"default": True}),
             },
             "optional": {"seed": ("INT", {"default": -1})},
@@ -170,7 +170,7 @@ class GenerateText:
         return {
             "required": {
                 "model": (
-                    "*",
+                    "COMBO",
                     {
                         "default": "llama-3.3-70b",
                     },
