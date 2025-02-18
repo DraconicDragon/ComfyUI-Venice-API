@@ -26,7 +26,7 @@ app.registerExtension({
                         charCountWidget.name = `Character count: ${inputText.length}`;
                         this.setDirtyCanvas(true); // Refresh the canvas to update UI
                     }
-                }, 1500); // Check every 500ms, 0 clue if good approach or not but it works
+                }, 1200); // Check every 1200ms, 0 clue if good approach or not but it works
                 // check https://docs.comfy.org/custom-nodes/javascript_examples#capture-ui-events for better approach?
             };
         }
