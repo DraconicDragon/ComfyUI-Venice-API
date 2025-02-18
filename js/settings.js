@@ -18,14 +18,5 @@ app.registerExtension({
 			}
 		},
 	],
-
-	async setup() {
-		// Load saved value from server on startup
-		const response = await api.fetchApi("/veniceai/get_apikey");
-		const savedKey = await response.json();
-
-		// Update the settings UI
-		app.extensionManager.setting.set("VeniceAI.apikey", savedKey.apikey);
-	}
 });
 

@@ -1,7 +1,8 @@
 import importlib
 import importlib.util
 
-from .pyserver import get_key_from_jssetting
+from .pyserver import get_key_from_jssetting, update_models_styles
+
 
 node_list = [
     "api_node",

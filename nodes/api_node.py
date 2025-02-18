@@ -100,14 +100,7 @@ class GenerateImage(GenerateImageBase):
         return {
             "required": {
                 "model": (
-                    [
-                        "flux-dev",
-                        "flux-dev-uncensored",
-                        "fluently-xl",
-                        "lustify-sdxl",
-                        "pony-realism",
-                        "stable-diffusion-3.5",
-                    ],
+                    "COMBO",
                     {"default": "flux-dev"},
                 ),
                 "prompt": ("STRING", {"default": "A flying cat made of lettuce", "multiline": True}),
@@ -532,8 +525,6 @@ NODE_CLASS_MAPPINGS = {
     "GenerateImage_VENICE": GenerateImage,
     "UpscaleImage_VENICE": UpscaleImage,
     "GenerateText_VENICE": GenerateText,
-    # "FluxPro_TOGETHER": FluxPro, # venice doesnt have flux pro/1.1/ultra
-    # "FluxPro11_TOGETHER": FluxPro11,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -542,6 +533,4 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "GenerateImage_VENICE": "Generate Image (Venice)",
     "UpscaleImage_VENICE": "Upscale Image (Venice)",
     "GenerateText_VENICE": "Generate Text (Venice)",
-    # "FluxPro_TOGETHER": "Flux Pro (TOGETHER)",https://music.youtube.com/watch?v=mH_Zl2Rgl5M
-    # "FluxPro11_TOGETHER": "Flux Pro 1.1 (TOGETHER)",
 }

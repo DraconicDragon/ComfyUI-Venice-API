@@ -1,0 +1,201 @@
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "fluently-xl",
+      "type": "image",
+      "object": "model",
+      "created": 1726851920,
+      "owned_by": "venice.ai",
+      "model_spec": {
+        "traits": [
+          "default",
+          "fastest"
+        ],
+        "modelSource": "https://huggingface.co/fluently/Fluently-XL-Final"
+      },
+      "humanized": "Fluently Xl | Default | Fastest"
+    },
+    {
+      "id": "flux-dev",
+      "type": "image",
+      "object": "model",
+      "created": 1726851920,
+      "owned_by": "venice.ai",
+      "model_spec": {
+        "traits": [
+          "highest_quality"
+        ],
+        "modelSource": "https://huggingface.co/black-forest-labs/FLUX.1-dev"
+      },
+      "humanized": "Flux Dev | Highest Quality"
+    },
+    {
+      "id": "flux-dev-uncensored",
+      "type": "image",
+      "object": "model",
+      "created": 1727746304,
+      "owned_by": "venice.ai",
+      "model_spec": {
+        "traits": [],
+        "modelSource": "https://huggingface.co/black-forest-labs/FLUX.1-dev"
+      },
+      "humanized": "Flux Dev Uncensored"
+    },
+    {
+      "id": "pony-realism",
+      "type": "image",
+      "object": "model",
+      "created": 1733935938,
+      "owned_by": "venice.ai",
+      "model_spec": {
+        "traits": [
+          "most_uncensored"
+        ],
+        "modelSource": "https://civitai.com/models/372465"
+      },
+      "humanized": "Pony Realism | Most Uncensored"
+    },
+    {
+      "id": "stable-diffusion-3.5",
+      "type": "image",
+      "object": "model",
+      "created": 1736635129,
+      "owned_by": "venice.ai",
+      "model_spec": {
+        "traits": [],
+        "modelSource": "https://huggingface.co/stabilityai/stable-diffusion-3.5-large"
+      },
+      "humanized": "Stable Diffusion 3.5"
+    },
+    {
+      "id": "lustify-sdxl",
+      "type": "image",
+      "object": "model",
+      "created": 1738704152,
+      "owned_by": "venice.ai",
+      "model_spec": {
+        "traits": [],
+        "modelSource": "https://civitai.com/models/573152/lustify-sdxl-nsfw-checkpoint"
+      },
+      "humanized": "Lustify SdXL"
+    },
+    {
+      "id": "llama-3.3-70b",
+      "type": "text",
+      "object": "model",
+      "created": 1733768349,
+      "owned_by": "venice.ai",
+      "model_spec": {
+        "availableContextTokens": 65536,
+        "traits": [
+          "function_calling_default",
+          "default"
+        ],
+        "modelSource": "https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct"
+      },
+      "humanized": "Llama 3.3 70B | ctx: 65536 | Default"
+    },
+    {
+      "id": "llama-3.2-3b",
+      "type": "text",
+      "object": "model",
+      "created": 1727966436,
+      "owned_by": "venice.ai",
+      "model_spec": {
+        "availableContextTokens": 131072,
+        "traits": [
+          "fastest"
+        ],
+        "modelSource": "https://huggingface.co/meta-llama/Llama-3.2-3B"
+      },
+      "humanized": "Llama 3.2 3B | ctx: 131072 | Fastest"
+    },
+    {
+      "id": "dolphin-2.9.2-qwen2-72b",
+      "type": "text",
+      "object": "model",
+      "created": 1726869022,
+      "owned_by": "venice.ai",
+      "model_spec": {
+        "availableContextTokens": 32768,
+        "traits": [
+          "most_uncensored"
+        ],
+        "modelSource": "https://huggingface.co/cognitivecomputations/dolphin-2.9.2-qwen2-72b"
+      },
+      "humanized": "Dolphin 2.9.2 Qwen2 72B | ctx: 32768 | Most Uncensored"
+    },
+    {
+      "id": "llama-3.1-405b",
+      "type": "text",
+      "object": "model",
+      "created": 1730396371,
+      "owned_by": "venice.ai",
+      "model_spec": {
+        "availableContextTokens": 63920,
+        "traits": [
+          "most_intelligent"
+        ],
+        "modelSource": "https://huggingface.co/meta-llama/Meta-Llama-3.1-405B-Instruct"
+      },
+      "humanized": "Llama 3.1 405B | ctx: 63920 | Most Intelligent"
+    },
+    {
+      "id": "qwen2.5-coder-32b",
+      "type": "text",
+      "object": "model",
+      "created": 1731628653,
+      "owned_by": "venice.ai",
+      "model_spec": {
+        "availableContextTokens": 32768,
+        "traits": [
+          "default_code"
+        ],
+        "modelSource": "https://huggingface.co/Qwen/Qwen2.5-Coder-32B-Instruct-GGUF"
+      },
+      "humanized": "Qwen2.5 Coder 32B | ctx: 32768 | Default Code"
+    },
+    {
+      "id": "deepseek-r1-llama-70b",
+      "type": "text",
+      "object": "model",
+      "created": 1737766445,
+      "owned_by": "venice.ai",
+      "model_spec": {
+        "availableContextTokens": 65536,
+        "traits": [],
+        "modelSource": "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Llama-70B"
+      },
+      "humanized": "Deepseek R1 Llama 70B | ctx: 65536"
+    },
+    {
+      "id": "deepseek-r1-671b",
+      "type": "text",
+      "object": "model",
+      "created": 1738690625,
+      "owned_by": "venice.ai",
+      "model_spec": {
+        "availableContextTokens": 131072,
+        "traits": [],
+        "modelSource": "https://huggingface.co/deepseek-ai/DeepSeek-R1"
+      },
+      "humanized": "Deepseek R1 671B | ctx: 131072"
+    },
+    {
+      "id": "qwen-2.5-vl",
+      "type": "text",
+      "object": "model",
+      "created": 1739074852,
+      "owned_by": "venice.ai",
+      "model_spec": {
+        "availableContextTokens": 32768,
+        "traits": [
+          "default_vision"
+        ],
+        "modelSource": "https://huggingface.co/Qwen/Qwen2.5-VL-72B-Instruct"
+      },
+      "humanized": "Qwen 2.5 Vl | ctx: 32768 | Default Vision"
+    }
+  ]
+}

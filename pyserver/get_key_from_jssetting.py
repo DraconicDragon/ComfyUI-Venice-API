@@ -25,7 +25,7 @@ def set_venice_key(apikey):
 
 
 @routes.post("/veniceai/save_apikey")
-async def post_key(request):
+async def post_key_server(request):
     data = await request.json()
 
     set_venice_key(data.get("apikey", ""))
@@ -34,7 +34,7 @@ async def post_key(request):
 
 
 @routes.get("/veniceai/get_apikey")
-async def get_key(request):
+async def get_key_server(request):
     return web.json_response({"apikey": os.getenv("VENICEAI_API_KEY")})
 
 
