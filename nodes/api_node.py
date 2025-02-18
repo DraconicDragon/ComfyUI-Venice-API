@@ -51,49 +51,6 @@ class GenerateImageBase:
         if width % 32 != 0 or height % 32 != 0:
             raise ValueError(f"Width {width} and height {height} must be multiples of 32.")
 
-    # NOTE: unused,
-    def generate_image(self, arguments):
-        self.check_multiple_of_32(arguments["width"], arguments["height"])
-
-        # try:
-        #     response = self.client.images.generate(
-        #         model=model_path,
-        #         prompt=arguments["prompt"],
-        #         width=arguments["width"],
-        #         height=arguments["height"],
-        #         steps=arguments["steps"],
-        #         n=1,
-        #         response_format="b64_json",
-        #         **{k: v for k, v in arguments.items() if k not in ["prompt", "width", "height", "steps"]}
-        #     )
-        #     return self.process_result(response)
-        # except Exception as e:
-        #     raise Exception(f"Error processing image result: {str(e)}") from e
-        # todo: is unsued rn
-        try:
-            payload = {
-                "model": arguments["model"],
-                "prompt": arguments["prompt"],
-                "negative_prompt": arguments["neg_prompt"],
-                "width": arguments["width"],
-                "height": arguments["height"],
-                "steps": arguments["steps"],
-                "hide_watermark": arguments["hide_watermark"],
-                "return_binary": False,
-                "seed": arguments["steps"],
-                "cfg_scale": arguments["cfg_scale"],
-                "style_preset": arguments["style_preset"],
-            }
-            headers = {"Authorization": f"Bearer {os.getenv('VENICEAI_API_KEY')}", "Content-Type": "application/json"}
-
-            url = VENICEAI_BASE_URL + API_ENDPOINTS["image_generate"]
-            response = requests.request("POST", url, json=payload, headers=headers)
-            return self.process_result(response.json())
-
-        except Exception as e:
-            raise Exception(f"Error processing image result: {str(e)}") from e
-
-
 class GenerateImage(GenerateImageBase):
     @classmethod
     def INPUT_TYPES(cls):
