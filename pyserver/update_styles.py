@@ -28,8 +28,9 @@ async def fetch_styles_list():
 
         # remove "object" key from response_data
         response_data.pop("object", None)
-        
+
         response_data["data"] = sorted(response_data.get("data", []))
+        response_data["data"] = response_data.get("data", []).prepend("none")
         with open(styles_list_path, "w") as f:
             json.dump(response_data, f, indent=2)
 
