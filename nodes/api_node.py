@@ -51,13 +51,14 @@ class GenerateImageBase:
         if width % 32 != 0 or height % 32 != 0:
             raise ValueError(f"Width {width} and height {height} must be multiples of 32.")
 
+
 class GenerateImage(GenerateImageBase):
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
                 "model": (
-                    "COMBO",
+                    "*",
                     {"default": "flux-dev"},
                 ),
                 "prompt": ("STRING", {"default": "A flying cat made of lettuce", "multiline": True}),
@@ -90,88 +91,7 @@ class GenerateImage(GenerateImageBase):
                 "batch_size": ("INT", {"default": 1, "min:": 1, "max": 4}),
                 "steps": ("INT", {"default": 20, "min": 1, "max": 30}),
                 "guidance": ("FLOAT", {"default": 3.0, "min": 0.1, "max": 15.0}),
-                "style_preset": (
-                    [
-                        "none",
-                        "3D Model",
-                        "Abstract",
-                        "Advertising",
-                        "Alien",
-                        "Analog Film",
-                        "Anime",
-                        "Architectural",
-                        "Cinematic",
-                        "Collage",
-                        "Comic Book",
-                        "Craft Clay",
-                        "Cubist",
-                        "Digital Art",
-                        "Disco",
-                        "Dreamscape",
-                        "Dystopian",
-                        "Enhance",
-                        "Fairy Tale",
-                        "Fantasy Art",
-                        "Fighting Game",
-                        "Film Noir",
-                        "Flat Papercut",
-                        "Food Photography",
-                        "Gothic",
-                        "Graffiti",
-                        "Grunge",
-                        "GTA",
-                        "HDR",
-                        "Horror",
-                        "Hyperrealism",
-                        "Impressionist",
-                        "Isometric Style",
-                        "Kirigami",
-                        "Legend of Zelda",
-                        "Line Art",
-                        "Long Exposure",
-                        "Lowpoly",
-                        "Minecraft",
-                        "Minimalist",
-                        "Monochrome",
-                        "Nautical",
-                        "Neon Noir",
-                        "Neon Punk",
-                        "Origami",
-                        "Paper Mache",
-                        "Paper Quilling",
-                        "Papercut Collage",
-                        "Papercut Shadow Box",
-                        "Photographic",
-                        "Pixel Art",
-                        "Pointillism",
-                        "Pokemon",
-                        "Pop Art",
-                        "Psychedelic",
-                        "Real Estate",
-                        "Renaissance",
-                        "Retro Arcade",
-                        "Retro Game",
-                        "RPG Fantasy Game",
-                        "Silhouette",
-                        "Space",
-                        "Stacked Papercut",
-                        "Steampunk",
-                        "Strategy Game",
-                        "Street Fighter",
-                        "Stained Glass",
-                        "Super Mario",
-                        "Surrealist",
-                        "Techwear Fashion",
-                        "Texture",
-                        "Thick Layered Papercut",
-                        "Tilt-Shift",
-                        "Tribal",
-                        "Typography",
-                        "Watercolor",
-                        "Zentangle",
-                    ],
-                    {"default": "none"},
-                ),
+                "style_preset": ("*", {"default": "none"}),
                 "hide_watermark": ("BOOLEAN", {"default": True}),
             },
             "optional": {"seed": ("INT", {"default": -1})},
@@ -196,20 +116,6 @@ class GenerateImage(GenerateImageBase):
         if model in ["flux-dev", "flux-dev-uncensored"]:
             print(f"VeniceAPI INFO: Ignoring negative prompt for {model}.")
             neg_prompt = ""
-
-        arguments = {  # ignore for now
-            "model": model,
-            "prompt": prompt,
-            "neg_prompt": neg_prompt,
-            "width": width,
-            "height": height,
-            "batch_size": batch_size,
-            "steps": steps,
-            "cfg_scale": guidance,
-            "style_preset": style_preset,
-            "hide_watermark": hide_watermark,
-            "seed": seed,
-        }
 
         try:
             self.check_multiple_of_32(width, height)  # todo: make this be validate node instead
@@ -246,7 +152,6 @@ class GenerateImage(GenerateImageBase):
 
             merged = torch.cat(images_tensor, dim=0)
             return (merged,)
-            # return super().generate_image(arguments)
 
         except Exception as e:
             raise Exception(f"Error processing image result: {str(e)}") from e
@@ -265,16 +170,7 @@ class GenerateText:
         return {
             "required": {
                 "model": (
-                    [
-                        "deepseek-r1-671b",
-                        "deepseek-r1-llama-70b",
-                        "dolphin-2.9.2-qwen2-72b",
-                        "qwen32b",
-                        "qwen-2.5-vl",
-                        "llama-3.1-405b",
-                        "llama-3.3-70b",
-                        "llama-3.2-3b",
-                    ],
+                    "*",
                     {
                         "default": "llama-3.3-70b",
                     },
@@ -412,64 +308,6 @@ class GenerateText:
 
 
 # endregion
-
-
-# class GenerateTextVision:
-#     @classmethod
-#     def INPUT_TYPES(cls):
-#         return {
-#             "required": {
-#                 "model": (
-#                     [
-#                         "deepseek-r1-671b",
-#                         "deepseek-r1-llama-70b",
-#                         "dolphin-2.9.2-qwen2-72b",
-#                         "qwen32b",
-#                         "qwen-2.5-vl",
-#                         "llama-3.1-405b",
-#                         "llama-3.3-70b",
-#                         "llama-3.2-3b",
-#                     ],
-#                     {
-#                         "default": "llama-3.3-70b",
-#                     },
-#                 ),
-#                 "system_prompt": ("STRING", {"default": "", "multiline": True}),
-#                 "prompt": ("STRING", {"default": "", "multiline": True}),
-#                 "frequency_penalty": ("FLOAT", {"default": 1.5, "min": 0.0, "max": 2.0, "step": 0.1}),
-#                 "presence_penalty": ("FLOAT", {"default": 1.5, "min": 0.0, "max": 2.0, "step": 0.1}),
-#                 "temperature": ("FLOAT", {"default": 0.5, "min": 0.0, "max": 2.0, "step": 0.1}),
-#                 "top_p": ("FLOAT", {"default": 0.9, "min": 0.0, "max": 1.0, "step": 0.1}),
-#             }
-#         }
-
-#     RETURN_TYPES = ("STRING",)
-#     RETURN_NAMES = ("response",)
-#     FUNCTION = "generate_text"
-#     CATEGORY = "venice.ai"
-
-#     def generate_text(self, model, system_prompt, prompt, frequency_penalty, presence_penalty, temperature, top_p):
-#         url = VENICEAI_BASE_URL + API_ENDPOINTS["text_generate"]
-#         payload = {
-#             "model": model,
-#             "messages": [
-#                 {"role": "system", "content": system_prompt},
-#                 {"role": "user", "content": prompt},
-#             ],
-#             "frequency_penalty": frequency_penalty,
-#             "presence_penalty": presence_penalty,
-#             "temperature": temperature,
-#             "top_p": top_p,
-#         }
-#         headers = {"Authorization": f"Bearer {os.getenv('VENICEAI_API_KEY')}", "Content-Type": "application/json"}
-#         response = requests.request("POST", url, json=payload, headers=headers)
-
-#         if response.status_code != 200:
-#             raise requests.exceptions.HTTPError(f"HTTP error: {response.status_code}, Response: {response.text}")
-
-#         json_response = response.json()
-#         content = json_response["choices"][0]["message"]["content"]  # theres multiple choices, but for what idk yet
-#         return (content,)
 
 
 # region upscale img

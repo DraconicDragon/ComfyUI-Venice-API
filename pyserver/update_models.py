@@ -17,7 +17,7 @@ data_dir.mkdir(exist_ok=True)
 all_model_list_path = data_dir / "all_model_list.json"
 
 
-async def fetch_model_list():
+async def fetch_models_list():
     try:
         headers = {"Authorization": f"Bearer {os.getenv('VENICEAI_API_KEY')}"}
         url = f"{VENICEAI_BASE_URL}{API_ENDPOINTS['list_models']}"
@@ -53,12 +53,12 @@ async def humanize_name(model_id: str) -> str:
     return humanized
 
 
-async def update_model_list():
+async def update_models_list():
     # img_model_json = await fetch_model_list("image")
     # txt_model_json = await fetch_model_list("text")
     # merged_json = {"object": "list", "data": img_model_json.get("data", []) + txt_model_json.get("data", [])}
 
-    response = await fetch_model_list()
+    response = await fetch_models_list()
 
     if response[1]:  # true = error happened
         return response
@@ -102,16 +102,16 @@ async def update_model_list():
     enhanced_json = {"object": "list", "data": enhanced_data}
     with open(all_model_list_path, "w") as f:
         json.dump(enhanced_json, f, indent=2)
+    return ("model list update success", False)
 
 
-@routes.get("/veniceai/update_model_list")
-async def update_model_list_server(request):
-    response = await update_model_list()
+@routes.get("/veniceai/update_models_list")
+async def update_models_list_server(request):
+    response = await update_models_list()
     return web.json_response({"message": response[0], "error": response[1]})
 
 
-async def get_local_model_list():
-    # Load JSON
+async def get_local_models_list():
     with open(all_model_list_path, "r") as f:
         model_list_json = json.load(f)
 
@@ -129,7 +129,7 @@ async def get_local_model_list():
 
 
 # NOTE: routes are frozen and don't update with ComfyUI-HotReloadHack
-@routes.get("/veniceai/get_model_list")
-async def get_local_model_list_server(request):
-    data = await get_local_model_list()
+@routes.get("/veniceai/get_models_list")
+async def get_local_models_list_server(request):
+    data = await get_local_models_list()
     return web.json_response(data)

@@ -2,6 +2,7 @@ config.ini
 test.py
 js/test.js
 veniceai_config.json
+data/*
 
 # Ignore Mac system files
 .DS_Store
