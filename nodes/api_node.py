@@ -475,7 +475,7 @@ class GenerateText:
 # region upscale img
 
 
-# todo: btw i dont even know if this is supported over api, but i mean its in the documentation so why not?
+# todo: needs rework
 class UpscaleImage:
     @classmethod
     def INPUT_TYPES(cls):
