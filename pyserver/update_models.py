@@ -17,7 +17,6 @@ data_dir.mkdir(exist_ok=True)
 all_model_list_path = data_dir / "all_model_list.json"
 
 
-# this can update with ComfyUI-HotReloadHack
 async def fetch_model_list():
     try:
         headers = {"Authorization": f"Bearer {os.getenv('VENICEAI_API_KEY')}"}
@@ -28,24 +27,17 @@ async def fetch_model_list():
         response.raise_for_status()  # Raises HTTPError for bad responses
 
         response_data = response.json()
-        return response_data
 
-    except requests.exceptions.HTTPError as http_err:
-        print(f"HTTP error occurred: {http_err}")
-    except requests.exceptions.RequestException as req_err:
-        print(f"Request error occurred: {req_err}")
-    except (ValueError, KeyError) as data_err:
-        print(f"Data parsing error: {data_err}")
+    # except requests.exceptions.HTTPError as http_err:
+    #     print(f"HTTP error occurred: {http_err}")
+    # except requests.exceptions.RequestException as req_err:
+    #     print(f"Request error occurred: {req_err}")
+    # except (ValueError, KeyError) as data_err:
+    #     print(f"Data parsing error: {data_err}")
     except Exception as e:
-        print(f"Unexpected error: {e}")
+        return (f"Unexpected error: {e}", True)
 
-    # Fallback to default models if any error occurs
-    print("Attempting to switch to default selection...")
-    default_models = {  # todo: this isnt the correct response format
-        "image": ["flux-dev", "flux-dev-uncensored", "fluently-xl", "pony-realism", "lustify-xl"],
-        "text": ["llama-3.3-70b"],
-    }
-    return default_models
+    return (response_data, False)
 
 
 async def humanize_name(model_id: str) -> str:
@@ -65,8 +57,14 @@ async def update_model_list():
     # img_model_json = await fetch_model_list("image")
     # txt_model_json = await fetch_model_list("text")
     # merged_json = {"object": "list", "data": img_model_json.get("data", []) + txt_model_json.get("data", [])}
-    merged_json = await fetch_model_list()
-    print("testicles")
+
+    response = await fetch_model_list()
+
+    if response[1]:  # true = error happened
+        return response
+
+    merged_json = response[0]
+
     # Validating response structure
     if not isinstance(merged_json, dict) or "data" not in merged_json:
         raise ValueError("Unexpected API response format")
@@ -108,8 +106,8 @@ async def update_model_list():
 
 @routes.get("/veniceai/update_model_list")
 async def update_model_list_server(request):
-    await update_model_list()
-    return web.json_response({})
+    response = await update_model_list()
+    return web.json_response({"message": response[0], "error": response[1]})
 
 
 async def get_local_model_list():

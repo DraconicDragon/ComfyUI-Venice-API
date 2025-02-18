@@ -15,7 +15,7 @@ app.registerExtension({
                 const modelWidget = this.widgets.find(w => w.name === "model");
                 if (modelWidget) {
                     try {
-                        // Fetch available models from API
+                        // Fetch available models from json list
                         const response = await api.fetchApi("/veniceai/get_model_list");
                         //alert(`response status ${response.status}`);
 
@@ -27,7 +27,6 @@ app.registerExtension({
                         // Update widget options with image models only
                         modelWidget.options.values = data.image_models;
 
-
                         // Properly refresh the widget
                         if (modelWidget.onChange) {
                             modelWidget.onChange();
@@ -37,8 +36,8 @@ app.registerExtension({
                         this.setDirtyCanvas(true);
                         //alert(`success? ${data.image_models}`);
                     } catch (error) {
-                        console.error("Failed to fetch VeniceAI models:", error);
-                        alert(`error ${error}`);
+                        console.error("(VeniceAI.NodeSpawn) Failed to fetch VeniceAI models:", error);
+                        alert(`(VeniceAI.NodeSpawn) Error: ${error}`);
                     }
                 }
             };
