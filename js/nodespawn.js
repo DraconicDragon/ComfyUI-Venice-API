@@ -15,6 +15,7 @@ app.registerExtension({
                 const modelWidget = this.widgets.find(w => w.name === "model");
                 if (modelWidget) {
                     try {
+                        console.log("(VeniceAI.NodeSpawn) Trying to fetch image models...");
                         // Fetch available models from json list
                         const response = await api.fetchApi("/veniceai/get_models_list");
                         //alert(`response status ${response.status}`);
@@ -41,8 +42,8 @@ app.registerExtension({
                         this.setDirtyCanvas(true);
                         //alert(`success? ${data.image_models}`);
                     } catch (error) {
-                        console.error("(VeniceAI.NodeSpawn) Failed to fetch models:", error);
-                        alert(`(VeniceAI.NodeSpawn) Error: ${error}`);
+                        console.error("(VeniceAI.NodeSpawn) Failed to fetch image models:", error);
+                        alert(`(VeniceAI.NodeSpawn) Failed to fetch image models: ${error}`);
                     }
                 }
 
@@ -50,6 +51,7 @@ app.registerExtension({
                 const stylesWidget = this.widgets.find(w => w.name === "style_preset");
                 if (stylesWidget) {
                     try {
+                        console.log("(VeniceAI.NodeSpawn) Trying to fetch styles...");
                         // Fetch available models from json list
                         const response = await api.fetchApi("/veniceai/get_styles_list");
                         //alert(`response status ${response.status}`);
@@ -78,7 +80,7 @@ app.registerExtension({
                         //alert(`success? ${data.image_models}`);
                     } catch (error) {
                         console.error("(VeniceAI.NodeSpawn) Failed to fetch styles:", error);
-                        alert(`(VeniceAI.NodeSpawn) Error: ${error}`);
+                        alert(`(VeniceAI.NodeSpawn) Failed to fetch styles: ${error}`);
                     }
                 }
             };
@@ -95,6 +97,7 @@ app.registerExtension({
                 const modelWidget = this.widgets.find(w => w.name === "model");
                 if (modelWidget) {
                     try {
+                        console.log("(VeniceAI.NodeSpawn) Trying to fetch text models...");
                         // Fetch available models from json list
                         const response = await api.fetchApi("/veniceai/get_models_list");
                         //alert(`response status ${response.status}`);
@@ -121,8 +124,8 @@ app.registerExtension({
                         this.setDirtyCanvas(true);
                         //alert(`success? ${data.image_models}`);
                     } catch (error) {
-                        console.error("(VeniceAI.NodeSpawn) Failed to fetch models:", error);
-                        alert(`(VeniceAI.NodeSpawn) Error: ${error}`);
+                        console.error("(VeniceAI.NodeSpawn) Failed to fetch text models:", error);
+                        alert(`(VeniceAI.NodeSpawn) Failed to fetch text models: ${error}`);
                     }
                 }
             };
