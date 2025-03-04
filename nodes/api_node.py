@@ -481,6 +481,6 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     # "testaaaaa": "TestAAAAA",
     "CharCountTextBox": "Textbox w/ char count",
     "GenerateImage_VENICE": "Generate Image (Venice)",
-    "UpscaleImage_VENICE": "Upscale Image (Venice)",
+    "UpscaleImage_VENICE": "Upscale Image (Venice) Not working!",
     "GenerateText_VENICE": "Generate Text (Venice)",
 }
