@@ -1,3 +1,18 @@
+
+# Todo: chat history/memory/context for LLM
+
+# todo: inpainting
+
+# todo: LLM characters
+
+# todo: use variants api (currently in beta)
+
+# todo: fix upscale node (see updated api doc)
+
+
+
+
+
 import base64
 import configparser
 import io

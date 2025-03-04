@@ -4,6 +4,16 @@ An unofficial custom node implementation for ComfyUI that integrates with venice
 
 Disclaimer: I just made this on a whim because someone wanted something similar to Together.AI custom nodes but have them use venice instead and also, I don't have access to any API keys for any of the mentioned services. i guess it should work, sometimes?
 
+# todo: fix upscale node (see updated api doc)
+
+# todo: inpainting
+
+# todo: LLM characters list
+
+# todo: use variants api (currently in beta)
+
+# Todo: chat history/memory/context for LLM
+
 *Implemented stuff from venice api:*
 
 - Image generation endpoint
@@ -33,27 +43,30 @@ If there's no "untested" on any of the points it means it should work but there'
 - Negative prompt support (ignored when Flux is selected)
 - Error handling i guess
 
-
 ### Installation - these instructions are a mess
 
 1. Clone this repository into your ComfyUI custom_nodes directory:
+
 ```bash
 cd ComfyUI/custom_nodes
 git clone https://github.com/DraconicDragon/ComfyUI-Venice-API.git
 ```
 
 2. Install the required dependencies: (this might be done by comfyui automatically on restart already?)
+
 ```bash
 pip install -r requirements.txt
 ```
 
 OR From the Comfyui Folder (this one is usually preferred if you have portable edition)
+
 ```bash
  ./python_embeded\python.exe -m pip install -r ComfyUI\custom_nodes\ComfyUI-Venice-API\requirements.txt
 ```
 
 outdated, configure in node, in future this will likely be in comfy settings
 3. Edit the `config.ini` file in the root directory and add venice.ai API key:
+
 ```ini
 [API]
 API_KEY = your_api_key_here

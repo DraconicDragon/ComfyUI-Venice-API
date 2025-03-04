@@ -1,3 +1,6 @@
+# dont follow stuff thats in here i dont think its correct 
+
+
 # ComfyUI venice.ai API Node Usage Guide
 
 ### Disclaimer: I just made this on a whim because someone wanted something similar to Together.AI custom nodes but use venice instead and I don't have access to any API keys for any of the mentioned services.
