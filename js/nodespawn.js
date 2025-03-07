@@ -5,7 +5,7 @@ app.registerExtension({
     name: "VeniceAI.NodeSpawn",
 
     async beforeRegisterNodeDef(nodeType, nodeData) {
-        if (nodeData.name === "GenerateImage_VENICE") {
+        if (nodeData.name === "GenerateImage_VENICE" || nodeData.name === "InpaintImage_VENICE") {
             const originalOnNodeCreated = nodeType.prototype.onNodeCreated;
             nodeType.prototype.onNodeCreated = async function () {
                 if (originalOnNodeCreated) {
