@@ -31,7 +31,7 @@ class GenerateImage(GenerateImageBase):
                         "default": 1024,
                         "min": 256,
                         "max": 2048,  # limit is 1280 but i dont want to restrict this in case of future updates, https://docs.venice.ai/api-reference/endpoint/image/generate#body-height
-                        "step": 8,
+                        "step": 16,
                         "tooltip": "Must be a multiple of 32. Maximum allowed by venice.ai is 1280",
                     },
                 ),
@@ -41,13 +41,13 @@ class GenerateImage(GenerateImageBase):
                         "default": 1024,
                         "min": 256,
                         "max": 2048,
-                        "step": 8,
+                        "step": 16,
                         "tooltip": "Must be a multiple of 32. Maximum allowed by venice.ai is 1280",
                     },
                 ),
                 "batch_size": ("INT", {"default": 1, "min:": 1, "max": 4}),
-                "steps": ("INT", {"default": 20, "min": 1, "max": 30}),
-                "guidance": ("FLOAT", {"default": 3.0, "min": 0.1, "max": 15.0}),
+                "steps": ("INT", {"default": 20, "min": 1, "max": 50}),
+                "guidance": ("FLOAT", {"default": 3.0, "min": 0.1, "max": 20.0}),
                 "style_preset": ("COMBO", {"default": "none"}),
                 "hide_watermark": ("BOOLEAN", {"default": True}),
             },
@@ -68,11 +68,15 @@ class GenerateImage(GenerateImageBase):
         hide_watermark,
         seed=-1,
     ):
-        images_tensor = ()  # empty tuple for tensors
-
+        if prompt == "" or len(prompt) > 1500:
+            raise ValueError("VeniceAI Generate Image Node: Prompt cannot be empty or above 1500 characters")
+        if len(neg_prompt) > 1500:
+            raise ValueError("VeniceAI Generate Image Node: Negative prompt cannot be above 1500 characters")
         if model in ["flux-dev", "flux-dev-uncensored"]:
             print(f"VeniceAPI INFO: Ignoring negative prompt for {model}.")
             neg_prompt = ""
+
+        images_tensor = ()  # empty tuple for tensors
 
         try:
             self.check_multiple_of_32(width, height)  # todo: make this be validate node instead
