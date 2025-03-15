@@ -6,8 +6,6 @@
 
 # todo: use variants api (currently in beta)
 
-# todo: fix upscale node (see updated api doc)
-
 
 import base64
 import io
