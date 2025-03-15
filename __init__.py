@@ -4,7 +4,12 @@ import importlib.util
 from .pyserver import get_key_from_jssetting, update_models, update_styles
 
 node_list = [
-    "api_node",
+    "things_n_stuff_node",
+    "gen_image_node",
+    "gen_image_inpaint_node",
+    "gen_text_node",
+    "upscale_image_node",
+    "util_nodes",
 ]
 
 NODE_CLASS_MAPPINGS = {}
