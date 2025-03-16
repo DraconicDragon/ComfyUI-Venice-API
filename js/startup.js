@@ -24,8 +24,8 @@ app.registerExtension({
                 alert(`${data.message}`);
                 console.log(`(VeniceAI.Startup) ${data.message}`);
             }
-            else {
-                // update the model list if not model list error
+            else{
+                // update the style list if not model list error
                 console.log("(VeniceAI.Startup) Updating styles list...");
                 //alert("fetching styles list")
                 const response_s = await api.fetchApi("/veniceai/update_styles_list");
@@ -35,6 +35,15 @@ app.registerExtension({
                     alert(`${data_s.message}`);
                     console.log(`(VeniceAI.Startup) ${data_s.message}`);
                 }
+
+                // update the characters list
+                // console.log("(VeniceAI.Startup) Updating characters list...");
+                // const response_c = await api.fetchApi("/veniceai/update_characters_list");
+                // const data_c = await response_c.json();
+                // if (data_c.error) {
+                //     alert(`${data_c.message}`);
+                //     console.log(`(VeniceAI.Startup) ${data_c.message}`);
+                // }
             }
         } catch (error) {
             // Handle any unexpected errors
