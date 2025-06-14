@@ -32,7 +32,7 @@ class GenerateImage(GenerateImageBase):
                         "min": 256,
                         "max": 2048,  # limit is 1280 but i dont want to restrict this in case of future updates, https://docs.venice.ai/api-reference/endpoint/image/generate#body-height
                         "step": 16,
-                        "tooltip": "Must be a multiple of 32. Maximum allowed by venice.ai is 1280",
+                        "tooltip": "Must be a multiple of 32. Maximum allowed by venice.ai at time of writing is 1280",
                     },
                 ),
                 "height": (
@@ -42,7 +42,7 @@ class GenerateImage(GenerateImageBase):
                         "min": 256,
                         "max": 2048,
                         "step": 16,
-                        "tooltip": "Must be a multiple of 32. Maximum allowed by venice.ai is 1280",
+                        "tooltip": "Must be a multiple of 32. Maximum allowed by venice.ai at time of writing is 1280",
                     },
                 ),
                 "batch_size": ("INT", {"default": 1, "min:": 1, "max": 4}),
@@ -50,7 +50,7 @@ class GenerateImage(GenerateImageBase):
                 "guidance": ("FLOAT", {"default": 3.0, "min": 0.1, "max": 20.0}),
                 "style_preset": ("COMBO", {"default": "none"}),
                 "hide_watermark": ("BOOLEAN", {"default": True}),
-                #"format": ("COMBO", {"default": "png", "values": ["png", "jpeg", "webp"]}),
+                # "format": ("COMBO", {"default": "png", "values": ["png", "jpeg", "webp"]}),
             },
             "optional": {"seed": ("INT", {"default": -1})},
         }
@@ -98,7 +98,7 @@ class GenerateImage(GenerateImageBase):
                 "seed": seed,
                 "return_binary": False,
                 "hide_watermark": hide_watermark,
-                "format": "png",
+                "format": "png",  # hardcoded because, change to format var and uncomment related stuff above if want dynamic
             }
             if style_preset == "none":
                 del payload["style_preset"]
