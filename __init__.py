@@ -14,7 +14,7 @@ node_list = [
     # "gen_image_inpaint_node",
     "gen_text_node",
     "gen_text_advanced_node",
-    "upscale_image_node",
+    "i2i_enhance_upscale_node",
     "util_nodes",
 ]
 
