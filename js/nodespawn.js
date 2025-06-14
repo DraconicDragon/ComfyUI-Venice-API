@@ -184,8 +184,38 @@ app.registerExtension({
 
                         this.setDirtyCanvas(true);
                     } catch (error) {
-                        console.error("(VeniceAI.NodeSpawn) Failed to fetch text models:", error);
-                        alert(`(VeniceAI.NodeSpawn) Failed to fetch text models:\n${error}`);
+                        console.error("(VeniceAI.NodeSpawn) Failed to fetch tts models:", error);
+                        alert(`(VeniceAI.NodeSpawn) Failed to fetch tts models:\n${error}`);
+                    }
+                }
+                const voicesWidget = this.widgets.find(w => w.name === "voice");
+                if (voicesWidget) {
+                    try {
+                        console.log("(VeniceAI.NodeSpawn) Trying to fetch tts voices...");
+                        const response = await api.fetchApi("/veniceai/get_models_list");
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error: ${response.status} ${response.statusText}`);
+                        }
+
+                        const rawText = await response.text();
+
+                        let data;
+                        try {
+                            data = JSON.parse(rawText);
+                        } catch (jsonError) {
+                            throw new Error(`Failed to parse JSON: ${jsonError.message}. Raw response: ${rawText}`);
+                        }
+
+                        voicesWidget.options.values = data.tts_voices;
+                        if (voicesWidget.onChange) {
+                            voicesWidget.onChange();
+                        }
+
+                        this.setDirtyCanvas(true);
+                    } catch (error) {
+                        console.error("(VeniceAI.NodeSpawn) Failed to fetch tts voices:", error);
+                        alert(`(VeniceAI.NodeSpawn) Failed to fetch tts voices:\n${error}`);
                     }
                 }
             }

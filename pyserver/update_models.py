@@ -6,7 +6,7 @@ from pathlib import Path
 import requests
 from aiohttp import web
 
-from server import PromptServer # type: ignore
+from server import PromptServer  # type: ignore
 
 from ..globals import API_ENDPOINTS, VENICEAI_BASE_URL
 
@@ -123,10 +123,23 @@ async def get_local_models_list():
     txt_models = [m["id"] for m in data if m.get("type") == "text"]
     tts_models = [m["id"] for m in data if m.get("type") == "tts"]
 
+    # Collect voices with humanized model name
+    tts_voices = []
+    for m in data:
+        if m.get("type") == "tts":
+            voices = m.get("model_spec", {}).get("voices", [])
+            # humanized = m.get("humanized", m.get("id", ""))
+            humanized = m.get("id", "")
+            tts_voices.extend([f"{humanized} - {voice}" for voice in voices])
+
+    # if tts_voices:
+    #     print(f"TTS Voices: {', '.join(tts_voices[:100])}")
+
     return {
         "image_models": sorted(img_models),
         "text_models": sorted(txt_models),
         "tts_models": sorted(tts_models),
+        "tts_voices": sorted(tts_voices),
         "model_list_json": model_list_json,
     }
 
