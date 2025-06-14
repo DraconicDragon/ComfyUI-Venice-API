@@ -1,11 +1,11 @@
 import os
+import re
 
 import requests
 import torch
 
 from ..globals import API_ENDPOINTS, VENICEAI_BASE_URL
 from ..nodes.gen_image_base import GenerateImageBase
-import re
 
 
 class GenerateImage(GenerateImageBase):
@@ -53,7 +53,7 @@ class GenerateImage(GenerateImageBase):
                 "hide_watermark": ("BOOLEAN", {"default": True}),
                 # "format": ("COMBO", {"default": "png", "values": ["png", "jpeg", "webp"]}),
             },
-            "optional": {"seed": ("INT", {"default": -1})},
+            "optional": {"seed": ("INT", {"default": -1, "min": -1, "max": 999999999})},
         }
 
     def generate(
