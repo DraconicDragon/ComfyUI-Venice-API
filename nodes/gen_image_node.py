@@ -15,7 +15,10 @@ class GenerateImage(GenerateImageBase):
             "required": {
                 "model": (
                     "COMBO",
-                    {"default": "flux-dev"},
+                    {
+                        "default": "flux-dev",
+                        "tooltip": "Model to use for image generation, if this just says flux-dev or C O M B O then something failed oopsie.",
+                    },
                 ),
                 "prompt": ("STRING", {"default": "A flying cat made of lettuce", "multiline": True}),
                 "neg_prompt": (
@@ -47,13 +50,36 @@ class GenerateImage(GenerateImageBase):
                     },
                 ),
                 "batch_size": ("INT", {"default": 1, "min:": 1, "max": 4}),
-                "steps": ("INT", {"default": 20, "min": 1, "max": 50}),
+                "steps": (
+                    "INT",
+                    {
+                        "default": 20,
+                        "min": 1,
+                        "max": 50,
+                        "tooltip": (
+                            "Number of inference steps. The following models have reduced max steps from "
+                            "the global max: venice-sd35: 30 max steps, hidream: 50 max steps, fluently-xl: 50 max steps, "
+                            "flux-dev: 30 max steps, flux-dev-uncensored: 30 max steps, getphat-flux: 50 max steps, "
+                            "lustify-sdxl: 50 max steps, pony-realism: 50 max steps, stable-diffusion-3.5: 30 max steps, "
+                            "juggernaut-xi: 50 max steps."
+                        ),
+                    },
+                ),
                 "guidance": ("FLOAT", {"default": 3.0, "min": 0.1, "max": 20.0}),
                 "style_preset": ("COMBO", {"default": "none"}),
                 "hide_watermark": ("BOOLEAN", {"default": True}),
+                "safe_mode": (
+                    "BOOLEAN",
+                    {
+                        "default": False,
+                        "tooltip": "Whether to use safe mode. If enabled, this will blur images that are classified as having adult content.",
+                    },
+                ),
                 # "format": ("COMBO", {"default": "png", "values": ["png", "jpeg", "webp"]}),
             },
-            "optional": {"seed": ("INT", {"default": -1, "min": -1, "max": 999999999})},
+            "optional": {
+                "seed": ("INT", {"default": -1, "min": -1, "max": 0x3B9AC9FF})
+            },  # 0xffffffffffffffff, current is 999999999
         }
 
     def generate(
@@ -68,6 +94,7 @@ class GenerateImage(GenerateImageBase):
         guidance,
         style_preset,
         hide_watermark,
+        safe_mode,
         # format,
         seed=-1,
     ):
@@ -99,6 +126,7 @@ class GenerateImage(GenerateImageBase):
                 "seed": seed,
                 "return_binary": False,
                 "hide_watermark": hide_watermark,
+                "safe_mode": safe_mode,
                 "format": "png",  # hardcoded because, change to format var and uncomment related stuff above if want dynamic
             }
             if style_preset == "none":
