@@ -5,6 +5,7 @@ from pathlib import Path
 
 import requests
 from aiohttp import web
+
 from server import PromptServer
 
 from ..globals import API_ENDPOINTS, VENICEAI_BASE_URL
@@ -120,10 +121,12 @@ async def get_local_models_list():
     # Create final sorted lists of names/ids
     img_models = [m["id"] for m in data if m.get("type") == "image"]
     txt_models = [m["id"] for m in data if m.get("type") == "text"]
+    tts_models = [m["id"] for m in data if m.get("type") == "tts"]
 
     return {
         "image_models": sorted(img_models),
         "text_models": sorted(txt_models),
+        "tts_models": sorted(tts_models),
         "model_list_json": model_list_json,
     }
 

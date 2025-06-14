@@ -3,7 +3,7 @@ import { app } from "../../scripts/app.js";
 
 app.registerExtension({
     name: "VeniceAI.NodeSpawn",
-
+    // todo: make more modular so less code ig idk dingdong
     async beforeRegisterNodeDef(nodeType, nodeData) {
         if (nodeData.name === "GenerateImage_VENICE" || nodeData.name === "InpaintImage_VENICE") {
             const originalOnNodeCreated = nodeType.prototype.onNodeCreated;
@@ -148,6 +148,47 @@ app.registerExtension({
                 //     }
                 // }
             };
+        }
+
+        if (nodeData.name === "GenerateSpeech_VENICE") {
+            const originalOnNodeCreated = nodeType.prototype.onNodeCreated;
+            nodeType.prototype.onNodeCreated = async function () {
+                if (originalOnNodeCreated) {
+                    originalOnNodeCreated.apply(this);
+                }
+
+                // Find the model widget
+                const modelWidget = this.widgets.find(w => w.name === "model");
+                if (modelWidget) {
+                    try {
+                        console.log("(VeniceAI.NodeSpawn) Trying to fetch tts models...");
+                        const response = await api.fetchApi("/veniceai/get_models_list");
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error: ${response.status} ${response.statusText}`);
+                        }
+
+                        const rawText = await response.text();
+
+                        let data;
+                        try {
+                            data = JSON.parse(rawText);
+                        } catch (jsonError) {
+                            throw new Error(`Failed to parse JSON: ${jsonError.message}. Raw response: ${rawText}`);
+                        }
+
+                        modelWidget.options.values = data.tts_models;
+                        if (modelWidget.onChange) {
+                            modelWidget.onChange();
+                        }
+
+                        this.setDirtyCanvas(true);
+                    } catch (error) {
+                        console.error("(VeniceAI.NodeSpawn) Failed to fetch text models:", error);
+                        alert(`(VeniceAI.NodeSpawn) Failed to fetch text models:\n${error}`);
+                    }
+                }
+            }
         }
     }
 });

@@ -2,8 +2,8 @@ import os
 import tempfile
 
 import requests
-import torch
-import torchaudio
+import torch  # type: ignore
+import torchaudio  # type: ignore
 
 from ..globals import API_ENDPOINTS, VENICEAI_BASE_URL
 
@@ -14,10 +14,7 @@ class GenerateSpeech:
         return {
             "required": {
                 "model": (
-                    [
-                        "tts-kokoro",
-                    ],
-                    # todo: make dynamic from js, also this is the only option available currently
+                    "COMBO",
                     {
                         "default": "tts-kokoro",
                     },
