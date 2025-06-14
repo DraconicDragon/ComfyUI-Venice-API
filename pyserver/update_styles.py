@@ -4,7 +4,8 @@ from pathlib import Path
 
 import requests
 from aiohttp import web
-from server import PromptServer
+
+from server import PromptServer  # type: ignore
 
 from ..globals import API_ENDPOINTS, VENICEAI_BASE_URL
 
@@ -16,7 +17,8 @@ data_dir.mkdir(exist_ok=True)
 styles_list_path = data_dir / "styles_list.json"
 
 
-async def fetch_styles_list():
+@routes.get("/veniceai/update_styles_list")
+async def update_styles_list_server(request):
     try:
         headers = {"Authorization": f"Bearer {os.getenv('VENICEAI_API_KEY')}"}
         url = f"{VENICEAI_BASE_URL}{API_ENDPOINTS['list_styles']}"
@@ -44,12 +46,7 @@ async def fetch_styles_list():
     except Exception as e:
         return (f"Unexpected error: {e}", True)
 
-    return (response_data, False)
-
-
-@routes.get("/veniceai/update_styles_list")
-async def update_styles_list_server(request):
-    response = await fetch_styles_list()
+    response = (response_data, False)
     return web.json_response({"message": response[0], "error": response[1]})
 
 
