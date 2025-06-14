@@ -82,7 +82,7 @@ class GenerateImage(GenerateImageBase):
                         "tooltip": "Whether to use safe mode. If enabled, this will blur images that are classified as having adult content.",
                     },
                 ),
-                # "format": ("COMBO", {"default": "png", "values": ["png", "jpeg", "webp"]}),
+                # "format": (["png", "jpeg", "webp"], {"default": "png",}),
             },
             "optional": {
                 "seed": ("INT", {"default": -1, "min": -0x3B9AC9FF, "max": 0x3B9AC9FF})
