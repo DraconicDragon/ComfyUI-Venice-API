@@ -89,7 +89,7 @@ class I2IEnhanceUpscale:
         url = VENICEAI_BASE_URL + API_ENDPOINTS["upscale_image"]
 
         if len(enhance_prompt) > 1500:
-            raise ValueError()
+            raise ValueError("Upscale Image (Venice) enhance_prompt cannot be above 1500 characters")
         if scale == 1:
             raise ValueError("Upscale Image (Venice) 'enhance' must be set to 'True' if scale is 1.")
         if scale == 4:
