@@ -66,6 +66,7 @@ class GenerateImage(GenerateImageBase):
                     },
                 ),
                 "guidance": ("FLOAT", {"default": 3.0, "min": 0.1, "max": 20.0}),
+                # "lora_strength": ("INT", {"default": 50, "min": 0, "max": 100}), # check docs idk how to work this yet
                 "style_preset": ("COMBO", {"default": "none"}),
                 "hide_watermark": (
                     "BOOLEAN",
@@ -98,6 +99,7 @@ class GenerateImage(GenerateImageBase):
         batch_size,
         steps,
         guidance,
+        # lora_strength,
         style_preset,
         hide_watermark,
         safe_mode,
@@ -124,6 +126,7 @@ class GenerateImage(GenerateImageBase):
                 "model": model,
                 "prompt": prompt,
                 "negative_prompt": neg_prompt,
+                # "lora_strength": lora_strength,
                 "style_preset": style_preset,
                 "height": height,
                 "width": width,
