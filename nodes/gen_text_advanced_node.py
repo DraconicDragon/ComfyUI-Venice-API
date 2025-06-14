@@ -132,7 +132,7 @@ class GenerateTextAdvanced:
                 ),
                 # "stop": ("STRING", {"default": "", "tooltip": "Up to 4 sequences where the API will stop generating further tokens. Defaults to null.", "placeholder": "stop: [\"\\n\"]"}),
                 # "stop_token_ids": ("STRING", {"default": "", "tooltip": "Array of token IDs where the API will stop generating further tokens. Example: [151643, 151645]", "placeholder": "151643, 151645, ..."}),
-                "enable_qwen25_vision": ("BOOLEAN", {"default": False}),
+                "enable_vision": ("BOOLEAN", {"default": False}),
             },
             "optional": {
                 "image_for_vision": ("IMAGE",),
@@ -214,7 +214,7 @@ class GenerateTextAdvanced:
                     target_height = ((256 + 13) // 14) * 14
                     target_width = round_down_to_multiple(int(target_height * aspect_ratio), 14)
 
-            pil_image = pil_image.resize((target_width, target_height), Image.LANCZOS)
+            pil_image = pil_image.resize((target_width, target_height), Image.LANCZOS) # type: ignore
 
             # Convert to base64 and check size
             buffered = io.BytesIO()
@@ -230,7 +230,7 @@ class GenerateTextAdvanced:
                 new_width = max(round_down_to_multiple(new_width, 14), 256)
                 new_height = max(round_down_to_multiple(new_height, 14), 256)
 
-                pil_image = pil_image.resize((new_width, new_height), Image.LANCZOS)
+                pil_image = pil_image.resize((new_width, new_height), Image.LANCZOS) # type: ignore
                 target_width, target_height = new_width, new_height
 
                 buffered = io.BytesIO()
@@ -280,7 +280,7 @@ class GenerateTextAdvanced:
 
         json_response = response.json()
         content = json_response["choices"][0]["message"]["content"]
-        print(content)
+        #print(content)
         return (content,)
 
 

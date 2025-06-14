@@ -26,7 +26,7 @@ class GenerateText:
                 "presence_penalty": ("FLOAT", {"default": 1.5, "min": 0.0, "max": 2.0, "step": 0.1}),
                 "temperature": ("FLOAT", {"default": 0.5, "min": 0.0, "max": 2.0, "step": 0.1}),
                 "top_p": ("FLOAT", {"default": 0.9, "min": 0.0, "max": 1.0, "step": 0.1}),
-                "enable_qwen25_vision": ("BOOLEAN", {"default": False}),
+                "enable_vision": ("BOOLEAN", {"default": False}),
             },
             "optional": {
                 "image_for_vision": ("IMAGE",),
@@ -96,7 +96,7 @@ class GenerateText:
                     target_height = ((256 + 13) // 14) * 14
                     target_width = round_down_to_multiple(int(target_height * aspect_ratio), 14)
 
-            pil_image = pil_image.resize((target_width, target_height), Image.LANCZOS)
+            pil_image = pil_image.resize((target_width, target_height), Image.LANCZOS) # type: ignore
 
             # Convert to base64 and check size
             buffered = io.BytesIO()
@@ -112,7 +112,7 @@ class GenerateText:
                 new_width = max(round_down_to_multiple(new_width, 14), 256)
                 new_height = max(round_down_to_multiple(new_height, 14), 256)
 
-                pil_image = pil_image.resize((new_width, new_height), Image.LANCZOS)
+                pil_image = pil_image.resize((new_width, new_height), Image.LANCZOS) # type: ignore
                 target_width, target_height = new_width, new_height
 
                 buffered = io.BytesIO()
