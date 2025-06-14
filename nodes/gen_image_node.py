@@ -78,8 +78,8 @@ class GenerateImage(GenerateImageBase):
                 # "format": ("COMBO", {"default": "png", "values": ["png", "jpeg", "webp"]}),
             },
             "optional": {
-                "seed": ("INT", {"default": -1, "min": -1, "max": 0x3B9AC9FF})
-            },  # 0xffffffffffffffff, current is 999999999
+                "seed": ("INT", {"default": -1, "min": -0x3B9AC9FF, "max": 0x3B9AC9FF})
+            },  # 0xffffffffffffffff is 64 bit integer limit, current hex is 999999999, venice max
         }
 
     def generate(
