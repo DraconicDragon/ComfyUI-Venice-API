@@ -3,7 +3,7 @@ import os
 import re
 
 import requests
-import torch # type: ignore
+import torch  # type: ignore
 
 from ..globals import API_ENDPOINTS, VENICEAI_BASE_URL
 from ..nodes.gen_image_base import GenerateImageBase
@@ -66,7 +66,7 @@ class GenerateImage(GenerateImageBase):
                         ),
                     },
                 ),
-                "guidance": ("FLOAT", {"default": 3.0, "min": 0.1, "max": 20.0}),
+                "guidance": ("FLOAT", {"default": 3.0, "min": 0.1, "max": 20.0, "step": 0.05}),
                 # "lora_strength": ("INT", {"default": 50, "min": 0, "max": 100}), # check docs idk how to work this yet
                 "style_preset": ("COMBO", {"default": "none"}),
                 "hide_watermark": (
