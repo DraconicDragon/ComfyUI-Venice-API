@@ -154,7 +154,6 @@ class GenerateSpeech:
 
         # remove everything from voice string after and including the hyphen " - blabla"
         voice = voice.split(" - ")[0] if " - " in voice else voice
-        print(voice)
 
         # Prepare JSON payload
         payload = {
