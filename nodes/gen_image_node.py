@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 
@@ -111,7 +112,7 @@ class GenerateImage(GenerateImageBase):
         if len(neg_prompt) > 1500:
             raise ValueError("VeniceAI Generate Image Node: Negative prompt cannot be above 1500 characters")
         if re.match(r"^flux.*", model):
-            print(f"VeniceAPI INFO: Ignoring negative prompt for {model}.")
+            logging.info(f"VeniceAPI INFO: Ignoring negative prompt for {model}.")
             neg_prompt = ""
 
         images_tensor = ()  # empty tuple for tensors
