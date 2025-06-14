@@ -4,13 +4,18 @@ An unofficial custom node implementation for ComfyUI that integrates with venice
 
 Disclaimer: I just made this on a whim because someone wanted something similar to Together.AI custom nodes but have them use venice instead and also, I don't have access to any API keys for any of the mentioned services. i guess it should work, sometimes?
 
-# todo: fix upscale node (see updated api doc)
+Speech API/TTS - Done (its in beta, Comfyui Settings > search for experimental and turn on the setting for having it show experimental nodes in search)
+New models may have different voices which are not handled right now so any new model might not be surported until code updated to dynamically update voices upon model change but this may pose an issue for workflow sharing so i probably have to just bunch all the voices together, unless theres a better option, maybe a string input
 
-# todo: inpainting
+Generate Image node: now has safe mode toggle and some more tooltips, and revised seed limits
+
+~~# todo: fix upscale node (see updated api doc)~~ DONE, its now called "I2I Enhance + Upscale (Venice), its a new node so the old one wont work anymore
+
+~~# todo: inpainting~~  Deprecated by venice, new thing coming ig
 
 # todo: LLM characters list
 
-# todo: use variants api (currently in beta)
+# todo: use variants api (currently in beta) | idk what happened to this
 
 # Todo: chat history/memory/context for LLM
 
