@@ -5,7 +5,7 @@ import os
 
 import requests
 from PIL import Image
-from torchvision.transforms import ToPILImage, ToTensor
+from torchvision.transforms import ToPILImage, ToTensor # type: ignore
 
 from ..globals import API_ENDPOINTS, VENICEAI_BASE_URL
 

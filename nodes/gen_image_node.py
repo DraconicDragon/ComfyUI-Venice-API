@@ -2,7 +2,7 @@ import os
 import re
 
 import requests
-import torch
+import torch # type: ignore
 
 from ..globals import API_ENDPOINTS, VENICEAI_BASE_URL
 from ..nodes.gen_image_base import GenerateImageBase

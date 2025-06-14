@@ -6,7 +6,7 @@ from pathlib import Path
 import requests
 from aiohttp import web
 
-from server import PromptServer
+from server import PromptServer # type: ignore
 
 from ..globals import API_ENDPOINTS, VENICEAI_BASE_URL
 
