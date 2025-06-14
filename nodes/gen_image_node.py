@@ -20,7 +20,7 @@ class GenerateImage(GenerateImageBase):
                 "neg_prompt": (
                     "STRING",
                     {
-                        "placeholder": "Bad composition, rating_explicit, Text, signature, lowres, lowres, low details, faded image, out of focus, cropped, clipped, cut-off, out of frame, deserted scene, empty scene, vacant scene, desolate scene, sparse décor, bad quality, worst quality,",
+                        "placeholder": "Negative Prompt. (Ignored for Flux based models.)\nBad composition, rating_explicit, Text, signature, lowres, faded image, out of focus, cropped, out of frame, vacant scene, bad quality, worst quality,",
                         "multiline": True,
                         "tooltip": "Negative prompt. This is ignored when using flux-dev or flux-dev-uncensored",
                     },
