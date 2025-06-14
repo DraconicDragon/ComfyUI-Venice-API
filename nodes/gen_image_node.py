@@ -67,7 +67,13 @@ class GenerateImage(GenerateImageBase):
                 ),
                 "guidance": ("FLOAT", {"default": 3.0, "min": 0.1, "max": 20.0}),
                 "style_preset": ("COMBO", {"default": "none"}),
-                "hide_watermark": ("BOOLEAN", {"default": True}),
+                "hide_watermark": (
+                    "BOOLEAN",
+                    {
+                        "default": True,
+                        "tooltip": "Whether to hide the Venice watermark. Venice may ignore this parameter for certain generated content (mainl NSFW seems like).",
+                    },
+                ),
                 "safe_mode": (
                     "BOOLEAN",
                     {
