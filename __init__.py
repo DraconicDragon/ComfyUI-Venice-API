@@ -3,13 +3,13 @@ import importlib.util
 
 from .pyserver import (
     get_key_from_jssetting,
-    #update_characters,
+    # update_characters,
     update_models,
     update_styles,
 )
 
 node_list = [
-    "things_n_stuff_node",
+    # "things_n_stuff_node",
     "gen_image_node",
     # "gen_image_inpaint_node",
     "gen_text_node",
