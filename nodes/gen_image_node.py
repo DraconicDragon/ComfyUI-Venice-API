@@ -5,6 +5,7 @@ import torch
 
 from ..globals import API_ENDPOINTS, VENICEAI_BASE_URL
 from ..nodes.gen_image_base import GenerateImageBase
+import re
 
 
 class GenerateImage(GenerateImageBase):
@@ -74,7 +75,7 @@ class GenerateImage(GenerateImageBase):
             raise ValueError("VeniceAI Generate Image Node: Prompt cannot be empty or above 1500 characters")
         if len(neg_prompt) > 1500:
             raise ValueError("VeniceAI Generate Image Node: Negative prompt cannot be above 1500 characters")
-        if model in ["flux-dev", "flux-dev-uncensored"]:
+        if re.match(r"^flux.*", model):
             print(f"VeniceAPI INFO: Ignoring negative prompt for {model}.")
             neg_prompt = ""
 
