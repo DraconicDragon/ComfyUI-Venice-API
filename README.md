@@ -1,4 +1,4 @@
-# ComfyUI venice.ai Flux/SDXL/LLM API Nodes
+# ComfyUI Venice.AI API Custom Nodes
 
 An unofficial custom node implementation for ComfyUI that integrates with venice.ai's Generative AI services such as Image, Text and TTS Generation models (as well as Upscale and Enhance). This project is adapted from [ComfyUI-FLUX-TOGETHER-API](https://github.com/BZcreativ/ComfyUI-FLUX-TOGETHER-API) to work with the venice.ai API.  
 **Note**: TTS is in Beta per Venice (as of 15th June 2025). The node for it "Generate Speech (Venice)" is set to BETA/Experimental too. To be able to find it with node search you have to enable "Show experimental nodes in search" setting in ComfyUI.
