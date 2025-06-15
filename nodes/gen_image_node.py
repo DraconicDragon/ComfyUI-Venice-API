@@ -50,7 +50,7 @@ class GenerateImage(GenerateImageBase):
                         "tooltip": "Must be a multiple of 32. Maximum allowed by venice.ai at time of writing is 1280",
                     },
                 ),
-                "batch_size": ("INT", {"default": 1, "min:": 1, "max": 4}),  # todo: this allows 0, why?
+                "batch_size": ("INT", {"default": 1, "min:": 1, "max": 4}),
                 "steps": (
                     "INT",
                     {
