@@ -34,7 +34,7 @@ class GenerateImage(GenerateImageBase):
                     "INT",
                     {
                         "default": 1024,
-                        "min": 256,
+                        "min": 0,
                         "max": 2048,  # limit is 1280 but i dont want to restrict this in case of future updates, https://docs.venice.ai/api-reference/endpoint/image/generate#body-height
                         "step": 16,
                         "tooltip": "Must be a multiple of 32. Maximum allowed by venice.ai at time of writing is 1280",
@@ -44,7 +44,7 @@ class GenerateImage(GenerateImageBase):
                     "INT",
                     {
                         "default": 1024,
-                        "min": 256,
+                        "min": 0,
                         "max": 2048,
                         "step": 16,
                         "tooltip": "Must be a multiple of 32. Maximum allowed by venice.ai at time of writing is 1280",
