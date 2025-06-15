@@ -148,7 +148,7 @@ class GenerateText:
 
         json_response = response.json()
         content = json_response["choices"][0]["message"]["content"]
-        print(content)
+        #print(content)
         return (content,)
 
 
