@@ -7,19 +7,20 @@ Disclaimer: I originally made this on a whim because someone wanted something si
 
 ## Nodes: (Text gen node is missing but will be updated soon)
 
-![3 of the main nodes showcased](./gh_assets/some_nodes.png)  
+![all nodes showcased](./gh_assets/nodes_showcase.png)  
 Image and Text models (as of 15th June 2025 | for Speech gen only tts-kokoro is available)  
+For updated text generation experience please use `Generate Text Advanced BETA (Venice)` node and additionally `Textgen Parameters (Venice) for extra venice.ai specific parameters to pass onto the generation process.  
 ![Image gen models](./gh_assets/image_gen_models_15june.png) ![Text gen models](./gh_assets/text_gen_models15june.png)
 
 ~~# todo: inpainting~~  Deprecated by venice, new thing is coming for it at some point
 
 todo: actual log, maybe separate logging file for less clutter from comfyui stuff, maybe, maybe... eeeee
 
-todo: LLM characters list
+~~todo: LLM characters list~~ done, but its in beta so subject to big changes, add using `Textgen Parameters (Venice)` node
 
-todo: use variants api (currently in beta) | idk what happened to this
+todo: use variants api (currently in beta) | idk what happened to this, probably gone
 
-Todo: chat history/memory/context for LLM
+Todo: chat history/memory/context for LLM | got a vague idea but thats pretty much it
 
 todo
 
@@ -30,19 +31,9 @@ todo
 
 ### Below ReadMe text is only slightly altered from original Flux Together API readme, it was not really reworked or anything so its likely not correct or up to date
 
-### Features
-
-- Direct integration with venice.ai's Flux and SDXL models
-- Support for flux-dev, flux-dev-uncensored, fluently-xl and pony-realism (status: 25th Jan 2025)
-- Support for all LLMs venice.ai offers (status: 25th Jan 2025)
-- Configurable parameters including steps, guidance scale, and dimensions
-  - including fake-ish batch size (just 2 requests after one another returned as 1 output)
-- Negative prompt support (ignored when Flux is selected)
-- Error handling i guess
-
 ### Installation - these instructions are a mess
 
-0. Before proceeding, check if you can find these nodes through ComfyUI-Manager interface rather than following the instructions.
+0. Before proceeding, check if you can find these nodes through ComfyUI-Manager interface rather than following the instructions below.
 
 <details><summary>Expand me to see harder instructions</summary>
 1. Clone this repository into your ComfyUI custom_nodes directory:
