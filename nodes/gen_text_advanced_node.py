@@ -71,7 +71,7 @@ class GenerateTextAdvanced:
                 "max_completion_tokens": (
                     "INT",
                     {
-                        "default": 123,
+                        "default": 420,
                         "min": 1,
                         "max": 131072,
                         "step": 1,
