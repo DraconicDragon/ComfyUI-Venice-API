@@ -14,7 +14,7 @@ class GenerateTextAdvanced:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "model": ("COMBO", {"default": "llama-3.3-70b", "tooltip": ("The model to use for text generation.")}),
+                "model": ("COMBO", {"default": "llama-3.1-405b", "tooltip": ("The model to use for text generation.")}),
                 "prompt": (
                     "STRING",
                     {
