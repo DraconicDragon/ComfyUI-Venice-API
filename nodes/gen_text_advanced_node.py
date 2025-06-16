@@ -18,20 +18,6 @@ class GenerateTextAdvanced:
                 "prompt": ("STRING", {"default": "", "multiline": True}),
                 "system_prompt": ("STRING", {"default": "", "multiline": True}),
                 "enable_system_prompt": ("BOOLEAN", {"default": True}),
-                # region venice_parameters
-                "enable_web_search": (["auto", "on", "off"], {"default": "auto"}),
-                "use_venice_system_prompt": (
-                    "BOOLEAN",
-                    {
-                        "default": False,
-                        "tooltip": "Whether to include the Venice supplied system prompts along side specified system prompts.",
-                    },
-                ),
-                # "character_slug": (
-                #     "COMBO",
-                #     {"default": "none", "tooltip": "The character slug of a public Venice character."},
-                # ),
-                # endregion
                 "frequency_penalty": (
                     "FLOAT",
                     {
@@ -135,6 +121,7 @@ class GenerateTextAdvanced:
                 "enable_vision": ("BOOLEAN", {"default": False}),
             },
             "optional": {
+                "venice_parameters": ("STRING", {"forceInput": True}),
                 "image_for_vision": ("IMAGE",),
             },
         }
@@ -151,8 +138,6 @@ class GenerateTextAdvanced:
         prompt,
         system_prompt,
         enable_system_prompt,
-        enable_web_search,
-        use_venice_system_prompt,
         frequency_penalty,
         presence_penalty,
         repetition_penalty,
@@ -171,6 +156,7 @@ class GenerateTextAdvanced:
         url = VENICEAI_BASE_URL + API_ENDPOINTS["text_generate"]
 
         user_content = []
+        venice_parameters = kwargs.get("venice_parameters", None)
         image_for_vision = kwargs.get("image_for_vision", None)
 
         if image_for_vision is not None and enable_vision:
@@ -214,7 +200,7 @@ class GenerateTextAdvanced:
                     target_height = ((256 + 13) // 14) * 14
                     target_width = round_down_to_multiple(int(target_height * aspect_ratio), 14)
 
-            pil_image = pil_image.resize((target_width, target_height), Image.LANCZOS) # type: ignore
+            pil_image = pil_image.resize((target_width, target_height), Image.LANCZOS)  # type: ignore
 
             # Convert to base64 and check size
             buffered = io.BytesIO()
@@ -230,7 +216,7 @@ class GenerateTextAdvanced:
                 new_width = max(round_down_to_multiple(new_width, 14), 256)
                 new_height = max(round_down_to_multiple(new_height, 14), 256)
 
-                pil_image = pil_image.resize((new_width, new_height), Image.LANCZOS) # type: ignore
+                pil_image = pil_image.resize((new_width, new_height), Image.LANCZOS)  # type: ignore
                 target_width, target_height = new_width, new_height
 
                 buffered = io.BytesIO()
@@ -255,11 +241,6 @@ class GenerateTextAdvanced:
         payload = {
             "model": model,
             "messages": messages,
-            "venice_parameters": {
-                "enable_web_search": enable_web_search,
-                "include_venice_system_prompt": use_venice_system_prompt,
-                # "character_slug": "venice",
-            },
             "frequency_penalty": frequency_penalty,
             "presence_penalty": presence_penalty,
             "repetition_penalty": repetition_penalty,
@@ -271,6 +252,8 @@ class GenerateTextAdvanced:
             "top_p": top_p,
             "min_p": min_p,
         }
+        if venice_parameters is not None:
+            payload["venice_parameters"] = venice_parameters
 
         headers = {"Authorization": f"Bearer {os.getenv('VENICEAI_API_KEY')}", "Content-Type": "application/json"}
         response = requests.post(url, json=payload, headers=headers)
@@ -280,7 +263,7 @@ class GenerateTextAdvanced:
 
         json_response = response.json()
         content = json_response["choices"][0]["message"]["content"]
-        #print(content)
+        # print(content)
         return (content,)
 
 

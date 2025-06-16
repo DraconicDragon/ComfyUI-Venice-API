@@ -14,6 +14,7 @@ node_list = [
     # "gen_image_inpaint_node",
     "gen_text_node",
     "gen_text_advanced_node",
+    "gen_text_venice_params_node",
     "i2i_enhance_upscale_node",
     "gen_speech_node",
     "util_nodes",
