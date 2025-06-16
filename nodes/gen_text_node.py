@@ -47,7 +47,7 @@ class GenerateText:
         presence_penalty,
         temperature,
         top_p,
-        enable_qwen25_vision,
+        enable_vision,
         **kwargs,
     ):
         url = VENICEAI_BASE_URL + API_ENDPOINTS["text_generate"]
@@ -55,7 +55,7 @@ class GenerateText:
         user_content = []
         image_for_vision = kwargs.get("image_for_vision", None)
 
-        if image_for_vision is not None and enable_qwen25_vision:
+        if image_for_vision is not None and enable_vision:
             # Convert tensor to PIL Image
             image_tensor = image_for_vision[0]  # shape: (H, W, 3)
             image_np = image_tensor.cpu().numpy()  # Still in (H, W, 3)
@@ -96,7 +96,7 @@ class GenerateText:
                     target_height = ((256 + 13) // 14) * 14
                     target_width = round_down_to_multiple(int(target_height * aspect_ratio), 14)
 
-            pil_image = pil_image.resize((target_width, target_height), Image.LANCZOS) # type: ignore
+            pil_image = pil_image.resize((target_width, target_height), Image.LANCZOS)  # type: ignore
 
             # Convert to base64 and check size
             buffered = io.BytesIO()
@@ -112,7 +112,7 @@ class GenerateText:
                 new_width = max(round_down_to_multiple(new_width, 14), 256)
                 new_height = max(round_down_to_multiple(new_height, 14), 256)
 
-                pil_image = pil_image.resize((new_width, new_height), Image.LANCZOS) # type: ignore
+                pil_image = pil_image.resize((new_width, new_height), Image.LANCZOS)  # type: ignore
                 target_width, target_height = new_width, new_height
 
                 buffered = io.BytesIO()
@@ -148,7 +148,7 @@ class GenerateText:
 
         json_response = response.json()
         content = json_response["choices"][0]["message"]["content"]
-        #print(content)
+        # print(content)
         return (content,)
 
 

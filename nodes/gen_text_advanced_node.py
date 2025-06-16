@@ -163,7 +163,7 @@ class GenerateTextAdvanced:
         top_k,
         top_p,
         min_p,
-        enable_qwen25_vision,
+        enable_vision,
         **kwargs,
         # endregion
     ):
@@ -173,7 +173,7 @@ class GenerateTextAdvanced:
         user_content = []
         image_for_vision = kwargs.get("image_for_vision", None)
 
-        if image_for_vision is not None and enable_qwen25_vision:
+        if image_for_vision is not None and enable_vision:
             # Convert tensor to PIL Image
             image_tensor = image_for_vision[0]  # shape: (H, W, 3)
             image_np = image_tensor.cpu().numpy()  # Still in (H, W, 3)
