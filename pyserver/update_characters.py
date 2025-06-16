@@ -5,7 +5,7 @@ from pathlib import Path
 import requests
 from aiohttp import web
 
-from server import PromptServer # type: ignore
+from server import PromptServer  # type: ignore
 
 from ..globals import API_ENDPOINTS, VENICEAI_BASE_URL
 
@@ -33,8 +33,7 @@ async def update_characters_list_server(request):
         # remove "object" key from response_data
         response_data.pop("object", None)
 
-        response_data["data"] = sorted(response_data.get("data", []), key=lambda item: item.get("name", ""))
-        response_data["data"].insert(0, "none")
+        response_data["data"] = sorted(response_data.get("data", []), key=lambda item: item.get("slug", ""))
 
         with open(characters_list_path, "w") as f:
             json.dump(response_data, f, indent=4)
@@ -47,8 +46,13 @@ async def update_characters_list_server(request):
 
 
 @routes.get("/veniceai/get_characters_list")
-async def get_local_characters_list(requests):
+async def get_local_characters_list(request):
     with open(characters_list_path, "r") as f:
         characters_list_json = json.load(f)
 
-    return web.json_response(characters_list_json)
+    characters = []
+    for item in characters_list_json.get("data", []):
+        if isinstance(item, dict) and item.get("slug"):
+            characters.append(item.get("slug"))
+
+    return web.json_response({"characters": characters})

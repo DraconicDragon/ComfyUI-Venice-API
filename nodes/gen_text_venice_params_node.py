@@ -15,9 +15,9 @@ class GenerateTextVeniceParameters:
         return {
             "required": {
                 "character_slug": (
-                    "STRING",
+                    "COMBO",
                     {
-                        "default": "cslug",
+                        "default": "strawberry-the-cat",
                         "tooltip": "",
                     },
                 ),
@@ -67,7 +67,7 @@ class GenerateTextVeniceParameters:
         }
 
     RETURN_TYPES = ("STRING",)
-    RETURN_NAMES = ("response",)
+    RETURN_NAMES = ("venice_parameters",)
     FUNCTION = "pass_on_params"
     CATEGORY = "venice.ai"
 

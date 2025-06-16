@@ -3,7 +3,7 @@ import importlib.util
 
 from .pyserver import (
     get_key_from_jssetting,  # noqa: F401
-    # update_characters,
+    update_characters,
     update_models,  # noqa: F401
     update_styles,  # noqa: F401
 )
