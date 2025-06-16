@@ -62,39 +62,21 @@ OR From the Comfyui Folder (this one is usually preferred if you have portable e
 1. Get your API key from [venice.ai](https://venice.ai)
 2. Add your API key in ComfyUI settings > VeniceAI
 
-### Usage
+### Parameters for Generate Image (Venice) node
 
-1. Start ComfyUI
-2. Find the "Generate Image (Venice)" in the node browser (double-click empty space in ComfyUI)
-    - or the Generate Text (Venice) node
-3. Configure the parameters:
-    - Prompt: Your image generation prompt
-    - Negative Prompt: Elements to avoid in the generation
-    - Steps: Generation steps (1-30 or 50)
-      - Some models only allow maximum 30 steps while others allow 50. See [venice api docs](https://docs.venice.ai/api-reference/endpoint/image/generate#body-steps). The node and/or API should throw an error if the steps are set too high
-    - Width: Image width (0-2048)
-    - Height: Image height (0-2048)
-      - Venice.AI upper limit is 1280 for width and height but the setting allows higher in   case that limit is changed upwards
-    - Seed: Generation seed
-    - CFG: Guidance scale (0.0-20.0)
-
-For detailed usage instructions, see [USAGE.md](USAGE.md) (not reworked)
-
-### Parameters for image gen node
-
-| Parameter       | Type    | Range     | Default | Description                             |
-|-----------------|---------|-----------|---------|-----------------------------------------|
-| prompt          | string  | 1-1500    | "A flying cat made of lettuce"| Main generation prompt |
-| negative_prompt | string  | 0-1500    | ""      | Elements to avoid                       |
-| width           | integer | 0-1280?   | 1024    | Image width                             |
-| height          | integer | 0-1280?   | 1024    | Image height                            |
-| batch_size      | integer | 1-4       | 1       | Number of Images to gen in a single run |
-| steps           | integer | 1-30 or 50| 20      | Number of generation steps              |
-| cfg/guidance    | float   | 0-20.0    | 3.0     | Guidance scale                          |
-| style_preset    | string  | N/A       | none    | The Style preset to apply               |
-| hide_watermark  | boolean | N/A       | true    | Whether to hide watermark (NSFW = false)|
-| safe_mode       | boolean | N/A       | false   | Whether to blur NSFW images             |
-| seed            | integer | -999999999 to 999999999 | -1  | Generation seed               |
+| Parameter       | Type    | Range      | Default | Description                             |
+|-----------------|---------|------------|---------|-----------------------------------------|
+| prompt          | string  | 1-1500     | "A flying cat made of lettuce" | Main generation prompt |
+| negative_prompt | string  | 0-1500     | ""      | Elements to avoid                       |
+| width           | integer | 0-1280?    | 1024    | Image width                             |
+| height          | integer | 0-1280?    | 1024    | Image height                            |
+| batch_size      | integer | 1-4        | 1       | Number of Images to gen in a single run |
+| steps           | integer | 1-30 or 50 | 20      | Number of generation steps              |
+| cfg/guidance    | float   | 0-20.0     | 3.0     | Guidance scale                          |
+| style_preset    | string  | N/A        | none    | The Style preset to apply               |
+| hide_watermark  | boolean | N/A        | true    | Whether to hide watermark (NSFW = false)|
+| safe_mode       | boolean | N/A        | false   | Whether to blur NSFW images             |
+| seed            | integer | -999999999 to 999999999 | -1  | Generation seed                |
 
 ### License
 
@@ -120,3 +102,5 @@ Contributions are welcome! Feel free to submit a Pull Request.
 ### Example
 
 todo
+
+For detailed usage instructions, see [USAGE.md](USAGE.md) (not reworked)
