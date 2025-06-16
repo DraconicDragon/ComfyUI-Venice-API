@@ -37,13 +37,13 @@ app.registerExtension({
                 }
 
                 // update the characters list
-                // console.log("(VeniceAI.Startup) Updating characters list...");
-                // const response_c = await api.fetchApi("/veniceai/update_characters_list");
-                // const data_c = await response_c.json();
-                // if (data_c.error) {
-                //     alert(`${data_c.message}`);
-                //     console.log(`(VeniceAI.Startup) ${data_c.message}`);
-                // }
+                console.log("(VeniceAI.Startup) Updating characters list...");
+                const response_c = await api.fetchApi("/veniceai/update_characters_list");
+                const data_c = await response_c.json();
+                if (data_c.error) {
+                    alert(`${data_c.message}`);
+                    console.log(`(VeniceAI.Startup) ${data_c.message}`);
+                }
             }
         } catch (error) {
             // Handle any unexpected errors
