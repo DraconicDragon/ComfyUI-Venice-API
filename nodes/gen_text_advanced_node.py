@@ -337,8 +337,11 @@ class GenerateTextAdvanced:
             raise requests.exceptions.HTTPError(f"HTTP error: {response.status_code}, Response: {response.text}")
 
         json_response = response.json()
-        content = json_response["choices"][0]["message"]["content"]
-        # print(content)
+        try:
+            content = json_response["choices"][0]["message"]["content"]
+        except (KeyError, IndexError, TypeError) as e:
+            raise ValueError(f"Unexpected API response format: {json_response}") from e
+
         return (content,)
 
 
