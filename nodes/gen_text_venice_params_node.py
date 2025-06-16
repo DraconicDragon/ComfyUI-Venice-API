@@ -1,14 +1,3 @@
-import base64
-import io
-import os
-
-import numpy as np
-import requests
-from PIL import Image
-
-from ..globals import API_ENDPOINTS, VENICEAI_BASE_URL
-
-
 class GenerateTextVeniceParameters:
     @classmethod
     def INPUT_TYPES(cls):
