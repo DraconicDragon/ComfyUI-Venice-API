@@ -14,10 +14,30 @@ class GenerateTextAdvanced:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "model": ("COMBO", {"default": "llama-3.3-70b"}),
-                "prompt": ("STRING", {"default": "", "multiline": True}),
-                "system_prompt": ("STRING", {"default": "", "multiline": True}),
-                "enable_system_prompt": ("BOOLEAN", {"default": True}),
+                "model": ("COMBO", {"default": "llama-3.3-70b", "tooltip": ("The model to use for text generation.")}),
+                "prompt": (
+                    "STRING",
+                    {
+                        "default": "",
+                        "multiline": True,
+                        "tooltip": ("The prompt to generate text from. Ask, command or chat with the model."),
+                    },
+                ),
+                "system_prompt": (
+                    "STRING",
+                    {
+                        "default": "",
+                        "multiline": True,
+                        "tooltip": ("Optional system prompt to guide the model's behavior."),
+                    },
+                ),
+                "enable_system_prompt": (
+                    "BOOLEAN",
+                    {
+                        "default": True,
+                        "tooltip": ("Enable or disable system prompt being passed on."),
+                    },
+                ),
                 "frequency_penalty": (
                     "FLOAT",
                     {
@@ -25,7 +45,10 @@ class GenerateTextAdvanced:
                         "min": -2.0,
                         "max": 2.0,
                         "step": 0.05,
-                        "tooltip": "Positive values penalize new tokens based on their existing frequency in the text so far, decreasing the model's likelihood to repeat the same line verbatim.",
+                        "tooltip": (
+                            "Positive values penalize new tokens based on their existing frequency in the text so far, "
+                            "decreasing the model's likelihood to repeat the same line verbatim."
+                        ),
                     },
                 ),
                 "presence_penalty": (
@@ -35,7 +58,10 @@ class GenerateTextAdvanced:
                         "min": -2.0,
                         "max": 2.0,
                         "step": 0.05,
-                        "tooltip": "Positive values penalize new tokens based on whether they appear in the text so far, increasing the model's likelihood to talk about new topics.",
+                        "tooltip": (
+                            "Positive values penalize new tokens based on whether they appear in the text so far, "
+                            "increasing the model's likelihood to talk about new topics."
+                        ),
                     },
                 ),
                 "repetition_penalty": (
@@ -45,7 +71,7 @@ class GenerateTextAdvanced:
                         "min": 0.0,
                         "max": 2.0,
                         "step": 0.05,
-                        "tooltip": "1.0 means no penalty. Values > 1.0 discourage repetition.",
+                        "tooltip": ("1.0 means no penalty. Values > 1.0 discourage repetition."),
                     },
                 ),
                 "max_temp": (
@@ -55,7 +81,7 @@ class GenerateTextAdvanced:
                         "min": 0.0,
                         "max": 2.0,
                         "step": 0.05,
-                        "tooltip": "Maximum temperature value for dynamic temperature scaling.",
+                        "tooltip": ("Maximum temperature value for dynamic temperature scaling."),
                     },
                 ),
                 "min_temp": (
@@ -65,7 +91,7 @@ class GenerateTextAdvanced:
                         "min": 0.0,
                         "max": 2.0,
                         "step": 0.05,
-                        "tooltip": "Minimum temperature value for dynamic temperature scaling.",
+                        "tooltip": ("Minimum temperature value for dynamic temperature scaling."),
                     },
                 ),
                 "max_completion_tokens": (
@@ -75,7 +101,10 @@ class GenerateTextAdvanced:
                         "min": 1,
                         "max": 131072,
                         "step": 1,
-                        "tooltip": "An upper bound for the number of tokens that can be generated for a completion, including visible output tokens and reasoning tokens.",
+                        "tooltip": (
+                            "An upper bound for the number of tokens that can be generated for "
+                            "a completion, including visible output tokens and reasoning tokens."
+                        ),
                     },
                 ),
                 "temperature": (
@@ -85,7 +114,11 @@ class GenerateTextAdvanced:
                         "min": 0.0,
                         "max": 2.0,
                         "step": 0.05,
-                        "tooltip": "Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic. We generally recommend altering this or top_p but not both.",
+                        "tooltip": (
+                            "Higher values like 0.8 will make the output more random, "
+                            "while lower values like 0.2 will make it more focused and deterministic. "
+                            "We generally recommend altering this or top_p but not both."
+                        ),
                     },
                 ),
                 "top_k": (
@@ -93,7 +126,7 @@ class GenerateTextAdvanced:
                     {
                         "default": 40,
                         "min": 0,
-                        "tooltip": "The number of highest probability vocabulary tokens to keep for top-k-filtering.",
+                        "tooltip": ("The number of highest probability vocabulary tokens to keep for top-k-filtering."),
                     },
                 ),
                 "top_p": (
@@ -103,7 +136,11 @@ class GenerateTextAdvanced:
                         "min": 0.0,
                         "max": 2.0,
                         "step": 0.01,
-                        "tooltip": "An alternative to sampling with temperature, called nucleus sampling, where the model considers the results of the tokens with top_p probability mass. So 0.1 means only the tokens comprising the top 10% probability mass are considered.",
+                        "tooltip": (
+                            "An alternative to sampling with temperature, called nucleus sampling, "
+                            "where the model considers the results of the tokens with top_p probability mass. "
+                            "So 0.1 means only the tokens comprising the top 10% probability mass are considered."
+                        ),
                     },
                 ),
                 "min_p": (
@@ -113,16 +150,49 @@ class GenerateTextAdvanced:
                         "min": 0.0,
                         "max": 1.0,
                         "step": 0.01,
-                        "tooltip": "Sets a minimum probability threshold for token selection. Tokens with probabilities below this value are filtered out.",
+                        "tooltip": (
+                            "Sets a minimum probability threshold for token selection. "
+                            "Tokens with probabilities below this value are filtered out."
+                        ),
                     },
                 ),
                 # "stop": ("STRING", {"default": "", "tooltip": "Up to 4 sequences where the API will stop generating further tokens. Defaults to null.", "placeholder": "stop: [\"\\n\"]"}),
                 # "stop_token_ids": ("STRING", {"default": "", "tooltip": "Array of token IDs where the API will stop generating further tokens. Example: [151643, 151645]", "placeholder": "151643, 151645, ..."}),
-                "enable_vision": ("BOOLEAN", {"default": False}),
+                "enable_vision": (
+                    "BOOLEAN",
+                    {
+                        "default": False,
+                        "tooltip": (
+                            "Enable or disable vision tasks. "
+                            "Requires image_for_vision input to be populated and "
+                            "for the LLM to actually support vision tasks to process."
+                        ),
+                    },
+                ),
             },
             "optional": {
-                "venice_parameters": ("STRING", {"forceInput": True}),
-                "image_for_vision": ("IMAGE",),
+                "venice_parameters": (
+                    "STRING",
+                    {
+                        "forceInput": True,
+                        "tooltip": (
+                            "Optional input. "
+                            "Use the Textgen Parameters (Venice) node to use "
+                            "extra, venice specific parameters for text generation."
+                        ),
+                    },
+                ),
+                "image_for_vision": (
+                    "IMAGE",
+                    {
+                        "tooltip": (
+                            "Optional input. "
+                            "Add an image for vision-supported LLMs to process. "
+                            "Will only be processed if 'enable_vision' is 'True' and "
+                            "if the LLM actually supports vision tasks."
+                        ),
+                    },
+                ),
             },
         }
 
@@ -130,6 +200,11 @@ class GenerateTextAdvanced:
     RETURN_NAMES = ("response",)
     FUNCTION = "generate_text"
     CATEGORY = "venice.ai"
+    DESCRIPTION = (
+        "Text Generation node that makes use of Venice.AI's text generation API. "
+        "Use Textgen Parameters (Venice) node to pass on extra Venice.AI specific parameters."
+        "Does not have chat history context. "
+    )
 
     def generate_text(
         # region params
