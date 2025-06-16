@@ -16,8 +16,6 @@ data_dir = script_dir.parent / "data"
 data_dir.mkdir(exist_ok=True)
 characters_list_path = data_dir / "characters_list.json"
 
-# TODO: unfinished
-
 
 @routes.get("/veniceai/update_characters_list")
 async def update_characters_list_server(request):
