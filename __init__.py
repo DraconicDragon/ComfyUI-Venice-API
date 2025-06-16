@@ -1,4 +1,6 @@
 import importlib
+import logging
+import os
 
 from .pyserver import (
     get_key_from_jssetting,  # noqa: F401
@@ -23,13 +25,15 @@ NODE_CLASS_MAPPINGS = {}
 NODE_DISPLAY_NAME_MAPPINGS = {}
 
 for module_name in node_list:
-    imported_module = importlib.import_module(f".nodes.{module_name}", __name__)
+    try:
+        imported_module = importlib.import_module(f".nodes.{module_name}", __name__)
+        NODE_CLASS_MAPPINGS.update(imported_module.NODE_CLASS_MAPPINGS)
+        NODE_DISPLAY_NAME_MAPPINGS.update(imported_module.NODE_DISPLAY_NAME_MAPPINGS)
+    except ImportError as e:
+        logging.warning(f"Could not import module '{module_name}': {e}")
 
-    NODE_CLASS_MAPPINGS = {**NODE_CLASS_MAPPINGS, **imported_module.NODE_CLASS_MAPPINGS}
-    NODE_DISPLAY_NAME_MAPPINGS = {**NODE_DISPLAY_NAME_MAPPINGS, **imported_module.NODE_DISPLAY_NAME_MAPPINGS}
 
-
-WEB_DIRECTORY = "./js"
+WEB_DIRECTORY = os.path.join(os.path.dirname(__file__), "js")
 
 
 __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS", "WEB_DIRECTORY"]
