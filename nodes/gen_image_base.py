@@ -35,7 +35,7 @@ class GenerateImageBase:
             raise Exception(f"Error processing image result: {str(e)}") from e
 
     def create_blank_image(self):
-        blank_img = Image.new("RGB", (512, 512), color="black")
+        blank_img = Image.new("RGB", (64, 64), color="black")
         img_array = np.array(blank_img).astype(np.float32) / 255.0
         img_tensor = torch.from_numpy(img_array)[None,]
         return (img_tensor,)
