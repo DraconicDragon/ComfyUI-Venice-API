@@ -16,7 +16,11 @@ For updated text generation experience please use `Generate Text Advanced BETA (
 
 todo: actual log, maybe separate logging file for less clutter from comfyui stuff, maybe, maybe... eeeee
 
-~~todo: LLM characters list~~ done, but its in beta so subject to big changes, add using `Textgen Parameters (Venice)` node
+todo: add settings to set default model by user
+
+todo: less convoluted approach to downloading and loading model/character/styles lists
+
+~~todo: LLM characters list~~ done, but its in beta so subject to big changes, use with `Textgen Parameters (Venice)` node
 
 todo: use variants api (currently in beta) | idk what happened to this, probably gone
 
