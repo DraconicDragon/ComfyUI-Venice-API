@@ -2,21 +2,27 @@ import os
 import tempfile
 
 import requests
-import torch  # type: ignore
-import torchaudio  # type: ignore
+import torch
+import torchaudio
 
-from ..globals import API_ENDPOINTS, VENICEAI_BASE_URL
+from ..globals import API_ENDPOINTS
+from ..nodes.catalog_utils import tts_model_choices, tts_voice_choices
+from ..nodes.utils import ensure_prompt_length
+from ..venice_client import client
 
 
 class GenerateSpeech:
     @classmethod
     def INPUT_TYPES(cls):
+        model_options = tts_model_choices()
+        voice_options = tts_voice_choices()
+
         return {
             "required": {
                 "model": (
-                    "COMBO",
+                    model_options,
                     {
-                        "default": "tts-kokoro",
+                        "default": model_options[0],
                     },
                 ),
                 "input": (
@@ -73,9 +79,9 @@ class GenerateSpeech:
                 #     },
                 # ),
                 "voice": (
-                    "COMBO",
+                    voice_options,
                     {
-                        "default": "af_sky - tts-kokoro",
+                        "default": voice_options[0],
                     },
                 ),
             }
@@ -89,10 +95,9 @@ class GenerateSpeech:
     EXPERIMENTAL = True
 
     def gen_speech(self, model, input, response_format, speed, voice):
-        if len(input) > 4096 or len(input) == 0:
-            raise ValueError("Generate Speech (Venice) Input exceeds the max length of 4096 characters or is empty.")
+        ensure_prompt_length(input, 4096, label="Speech input")
 
-        url = VENICEAI_BASE_URL + API_ENDPOINTS["speech_generate"]
+        url = API_ENDPOINTS["speech_generate"]
 
         # remove everything from voice string after and including the hyphen " - blabla"
         voice = voice.split(" - ")[0] if " - " in voice else voice
@@ -107,12 +112,14 @@ class GenerateSpeech:
             "streaming": False,
         }
 
-        headers = {"Authorization": f"Bearer {os.getenv('VENICEAI_API_KEY')}", "Content-Type": "application/json"}
-
         # Send request
         try:
-            response = requests.post(url, json=payload, headers=headers)
-            response.raise_for_status()
+            response = client.request(
+                "POST",
+                url,
+                json=payload,
+                headers={"Content-Type": "application/json"},
+            )
         except requests.exceptions.RequestException as e:
             raise RuntimeError(f"Generate Speech (Venice) API request failed: {str(e)}")
 

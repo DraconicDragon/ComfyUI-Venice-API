@@ -1,12 +1,17 @@
+from ..nodes.catalog_utils import character_choices
+
+
 class GenerateTextVeniceParameters:
     @classmethod
     def INPUT_TYPES(cls):
+        character_options = character_choices()
+
         return {
             "required": {
                 "character_slug": (
-                    "COMBO",
+                    character_options,
                     {
-                        "default": "strawberry-the-cat",
+                        "default": character_options[0],
                         "tooltip": ("The character slug of a public Venice character."),
                     },
                 ),

@@ -1,33 +1,45 @@
 import logging
-import os
 import re
 
-import requests
-import torch  # type: ignore
+import torch
 
-from ..globals import API_ENDPOINTS, VENICEAI_BASE_URL
+from ..globals import API_ENDPOINTS
+from ..nodes.catalog_utils import image_model_choices, style_choices
 from ..nodes.gen_image_base import GenerateImageBase
+from ..nodes.utils import ensure_multiple_of, ensure_prompt_length
+from ..venice_client import client
 
 
 class GenerateImage(GenerateImageBase):
     @classmethod
     def INPUT_TYPES(cls):
+        model_choices = image_model_choices()
+        style_preset_options = style_choices()
+
         return {
             "required": {
                 "model": (
-                    "COMBO",
+                    model_choices,
                     {
-                        "default": "flux-dev",
-                        "tooltip": "Model to use for image generation, if this just says flux-dev or C O M B O then something failed oopsie.",
+                        "default": model_choices[0],
+                        "tooltip": "Model to use for image generation",
                     },
                 ),
-                "prompt": ("STRING", {"default": "A flying cat made of lettuce", "multiline": True}),
+                "prompt": (
+                    "STRING",
+                    {
+                        "default": "A flying cat made of lettuce",
+                        "multiline": True,
+                        "tooltip": "The text prompt to guide the image generation",
+                        "placeholder": "Positive Prompt. Example: A flying cat made of lettuce",
+                    },
+                ),
                 "neg_prompt": (
                     "STRING",
                     {
-                        "placeholder": "Negative Prompt. (Ignored for Flux based models.)\nBad composition, rating_explicit, Text, signature, lowres, faded image, out of focus, cropped, out of frame, vacant scene, bad quality, worst quality,",
+                        "placeholder": "Negative Prompt. (Ignored for Flux based models.)\n Example: bad composition, rating_explicit, bad quality,",
                         "multiline": True,
-                        "tooltip": "Negative prompt. This is ignored when using flux-dev or flux-dev-uncensored",
+                        "tooltip": "Negative prompt. This is ignored when using flux-dev or flux-dev-uncensored or similar models that do not support CFG (Classifier-Free-Guidance)",
                     },
                 ),
                 "width": (
@@ -50,7 +62,15 @@ class GenerateImage(GenerateImageBase):
                         "tooltip": "Must be a multiple of 32. Maximum allowed by venice.ai at time of writing is 1280",
                     },
                 ),
-                "batch_size": ("INT", {"default": 1, "min": 1, "max": 4}),
+                "batch_size": (
+                    "INT",
+                    {
+                        "default": 1,
+                        "min": 1,
+                        "max": 4,
+                        "tooltip": "Number of images to generate in a single batch. IMPORTANT: Doesn't do actual batches like ComfyUI would, just sends batches amount of different requests to Venice.",
+                    },
+                ),
                 "steps": (
                     "INT",
                     {
@@ -66,9 +86,23 @@ class GenerateImage(GenerateImageBase):
                         ),
                     },
                 ),
-                "guidance": ("FLOAT", {"default": 3.0, "min": 0.0, "max": 20.0, "step": 0.05}),
+                "guidance": (
+                    "FLOAT",
+                    {
+                        "default": 3.0,
+                        "min": 0.0,
+                        "max": 20.0,
+                        "step": 0.05,
+                        "tooltip": "CFG scale parameter or 'Guidance' for Flux",
+                    },
+                ),
                 # "lora_strength": ("INT", {"default": 50, "min": 0, "max": 100}), # check docs idk how to work this yet
-                "style_preset": ("COMBO", {"default": "none"}),
+                "style_preset": (
+                    style_preset_options,
+                    {
+                        "default": style_preset_options[0],
+                    },
+                ),
                 "hide_watermark": (
                     "BOOLEAN",
                     {
@@ -90,6 +124,26 @@ class GenerateImage(GenerateImageBase):
             },  # 0xffffffffffffffff is 64 bit integer limit, current hex is 999999999, venice max
         }
 
+    # todo: add variants for batch size
+    # todo: implement lora and lora_strength
+    # todo: see if aspect_ratio needs to be added (some models incl nano banana pro use this)
+    # https://docs.venice.ai/api-reference/endpoint/image/generate
+    # todo: see if resolution needs to be added (some models incl nano banana pro use this)
+    # todo: add enable_web_search, mention it charges extra credits
+    # todo: change up default limits, prompt length max is 7500 now
+    @classmethod
+    def VALIDATE_INPUTS(cls, input_types, **kwargs):
+        width = input_types.get("width", kwargs.get("width"))
+        height = input_types.get("height", kwargs.get("height"))
+        prompt = input_types.get("prompt", kwargs.get("prompt"))
+        neg_prompt = input_types.get("neg_prompt", kwargs.get("neg_prompt"))
+
+        ensure_multiple_of(width, height)
+        ensure_prompt_length(prompt, 1500, "Prompt")
+        ensure_prompt_length(neg_prompt, 1500, "Negative Prompt", allow_empty=True)
+
+        return True
+
     def generate(
         self,
         model,
@@ -107,10 +161,6 @@ class GenerateImage(GenerateImageBase):
         # format,
         seed=-1,
     ):
-        if prompt == "" or len(prompt) > 1500:
-            raise ValueError("VeniceAI Generate Image Node: Prompt cannot be empty or above 1500 characters")
-        if len(neg_prompt) > 1500:
-            raise ValueError("VeniceAI Generate Image Node: Negative prompt cannot be above 1500 characters")
         if re.match(r"^flux.*", model):
             logging.info(f"VeniceAPI INFO: Ignoring negative prompt for {model}.")
             neg_prompt = ""
@@ -118,11 +168,6 @@ class GenerateImage(GenerateImageBase):
         images_tensor = ()  # empty tuple for tensors
 
         try:
-            self.check_multiple_of_32(width, height)  # todo: make this be validate node instead
-
-            headers = {"Authorization": f"Bearer {os.getenv('VENICEAI_API_KEY')}", "Content-Type": "application/json"}
-            url = VENICEAI_BASE_URL + API_ENDPOINTS["image_generate"]
-
             payload = {
                 "model": model,
                 "prompt": prompt,
@@ -138,20 +183,15 @@ class GenerateImage(GenerateImageBase):
                 "hide_watermark": hide_watermark,
                 "safe_mode": safe_mode,
                 "format": "png",  # hardcoded because, change to format var and uncomment related stuff above if want dynamic
+                "embed_exif_metadata": True,  # this might not work and be overriden by comfyui on image save
             }
             if style_preset == "none":
                 del payload["style_preset"]
 
             for i in range(batch_size):
                 payload["seed"] = seed + i
-                response = requests.request("POST", url, json=payload, headers=headers)
-
-                if response.status_code != 200:
-                    raise requests.exceptions.HTTPError(
-                        f"HTTP error: {response.status_code}, Response: {response.text}"
-                    )
-
-                images_tensor += self.process_result(response.json())
+                response_json = client.post_json(API_ENDPOINTS["image_generate"], payload)
+                images_tensor += self.process_result(response_json)
 
             merged = torch.cat(images_tensor, dim=0)
             return (merged,)

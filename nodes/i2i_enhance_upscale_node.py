@@ -1,13 +1,14 @@
 import base64
 import io
 import logging
-import os
 
 import requests
 from PIL import Image
-from torchvision.transforms import ToPILImage, ToTensor # type: ignore
+from torchvision.transforms import ToPILImage, ToTensor  # type: ignore
 
-from ..globals import API_ENDPOINTS, VENICEAI_BASE_URL
+from ..globals import API_ENDPOINTS
+from ..nodes.utils import ensure_prompt_length
+from ..venice_client import client
 
 
 class I2IEnhanceUpscale:
@@ -86,10 +87,9 @@ class I2IEnhanceUpscale:
     CATEGORY = "venice.ai"
 
     def i2i_enhance_upscale(self, image, scale, enhance, enhance_creativity, enhance_prompt, replication):
-        url = VENICEAI_BASE_URL + API_ENDPOINTS["upscale_image"]
+        response = None
 
-        if len(enhance_prompt) > 1500:
-            raise ValueError("Upscale Image (Venice) enhance_prompt cannot be above 1500 characters")
+        ensure_prompt_length(enhance_prompt, 1500, label="Enhance prompt", allow_empty=True)
         if scale == 1:
             raise ValueError("Upscale Image (Venice) 'enhance' must be set to 'True' if scale is 1.")
         if scale == 4:
@@ -134,12 +134,14 @@ class I2IEnhanceUpscale:
             "replication": replication,
         }
 
-        headers = {"Authorization": f"Bearer {os.getenv('VENICEAI_API_KEY')}", "Content-Type": "application/json"}
-
         # Send request
         try:
-            response = requests.post(url, json=payload, headers=headers)
-            response.raise_for_status()
+            response = client.request(
+                "POST",
+                API_ENDPOINTS["upscale_image"],
+                json=payload,
+                headers={"Content-Type": "application/json"},
+            )
         except requests.exceptions.RequestException as e:
             raise RuntimeError(f"Upscale Image (Venice) API request failed: {str(e)}")
 

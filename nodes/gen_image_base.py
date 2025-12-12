@@ -3,9 +3,10 @@ import io
 import logging
 
 import numpy as np
-import torch # type: ignore
-import torchvision.transforms as transforms # type: ignore
+import torch  # type: ignore
+import torchvision.transforms as transforms  # type: ignore
 from PIL import Image
+
 
 
 class GenerateImageBase:
@@ -34,12 +35,9 @@ class GenerateImageBase:
         except Exception as e:
             raise Exception(f"Error processing image result: {str(e)}") from e
 
+    # unused
     def create_blank_image(self):
         blank_img = Image.new("RGB", (64, 64), color="black")
         img_array = np.array(blank_img).astype(np.float32) / 255.0
         img_tensor = torch.from_numpy(img_array)[None,]
         return (img_tensor,)
-
-    def check_multiple_of_32(self, width, height):
-        if width % 32 != 0 or height % 32 != 0:
-            raise ValueError(f"Width {width} and height {height} must be multiples of 32.")

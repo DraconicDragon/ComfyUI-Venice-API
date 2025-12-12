@@ -6,9 +6,13 @@ API_ENDPOINTS = {
     "upscale_image": "/image/upscale",  # NOTE: apparently doesnt even work yet? idk; response type is image/png file, content type is multipart/form-data
     "text_generate": "/chat/completions",  # has much info, text response is in choices: content, can have multiple choices apparently but dosnt seem to be utilized
     "speech_generate": "/audio/speech",  # type: file (audio/aac; audio/mpeg; audio/wav.. etc)
+    "video_queue": "/video/queue",  #
+    "video_quote": "/video/quote",  # price estimate, takes same payload as video_queue
+    "video_retrieve": "/video/retrieve",  # get video file by job id
+    "list_api_keys": "/api_keys",
 }
 
 VENICEAI_BASE_URL = "https://api.venice.ai/api/v1"
 
-# unused right now
-headers = {"User-Agent": "ComfyUI-Venice-API/1.0 (by draconicdragon on github)"}
+# request hygiene
+USER_AGENT = "ComfyUI-Venice-API/1.0 (by draconicdragon on github)"
