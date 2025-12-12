@@ -10,6 +10,8 @@ from ..nodes.catalog_utils import image2video_model_choices
 from ..nodes.utils import ensure_prompt_length
 from ..venice_client import client
 
+# todo: this node probably dont needed if image2video is easy to add in gen_video_from_text_node
+
 
 class GenerateVideoFromImage:
     @classmethod
