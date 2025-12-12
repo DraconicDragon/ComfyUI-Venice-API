@@ -33,7 +33,7 @@ class DummyResponse:
         return None
 
 
-os.environ["VENICE_CLIENT_DRY_RUN"] = "1"
+# os.environ["VENICE_CLIENT_DRY_RUN"] = "1"
 
 
 class VeniceClient:
