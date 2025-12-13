@@ -3,7 +3,7 @@ test.py
 js/test.js
 veniceai_config.json
 data/*
-testing_videos/*
+testing_video/*
 
 # Ignore Mac system files
 .DS_Store
