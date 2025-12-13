@@ -9,6 +9,10 @@ import requests
 from .globals import API_ENDPOINTS, USER_AGENT, VENICEAI_BASE_URL
 from .venice_config import config as venice_config
 
+LOG = logging.getLogger(__name__)
+if os.environ.get("VENICE_CLIENT_DEBUG", "").lower() in {"1", "true"}:
+    LOG.setLevel(logging.DEBUG)
+
 
 class VeniceAPIError(Exception):
     pass
@@ -31,9 +35,6 @@ class DummyResponse:
 
     def __getattr__(self, item: str) -> Any:
         return None
-
-
-# os.environ["VENICE_CLIENT_DRY_RUN"] = "1"
 
 
 class VeniceClient:
@@ -86,19 +87,50 @@ class VeniceClient:
             response = self._session.request(method, url, headers=self._build_headers(headers), **kwargs)
             response.raise_for_status()
         except requests.HTTPError as exc:
+            self._log_response(method, endpoint, exc.response)
             hint = (
                 self._friendly_status_hint(exc.response.status_code)
                 if exc.response is not None
                 else "Unexpected response from VeniceAI."
             )
             message = f"Venice request failed ({method} {endpoint}): {exc}. \n{hint}"
-            logging.debug("Venice request failed: %s %s %s", method, endpoint, exc)
+            LOG.debug("Venice request failed: %s %s %s", method, endpoint, exc)
             raise VeniceAPIError(message) from exc
         except requests.RequestException as exc:
             message = f"{self._friendly_network_hint()} Details: {exc}"
-            logging.debug("Venice network error: %s %s %s", method, endpoint, exc)
+            LOG.debug("Venice network error: %s %s %s", method, endpoint, exc)
             raise VeniceAPIError(message) from exc
+        self._log_response(method, endpoint, response)
         return response
+
+    def _log_response(self, method: str, endpoint: str, response: Optional[requests.Response | DummyResponse]) -> None:
+        if not LOG.isEnabledFor(logging.DEBUG) or response is None:
+            return
+
+        headers = getattr(response, "headers", None)
+        header_snapshot: Dict[str, Any] = dict(headers) if headers else {}
+        content_type = (header_snapshot.get("Content-Type") or "").lower()
+
+        body = ""
+        readable_body = content_type.startswith("application/json") or content_type.startswith("text/")
+        if readable_body or not content_type:
+            try:
+                body = response.text or ""
+            except Exception as exc:
+                body = f"<unable to read body: {exc}>"
+            if len(body) > 2000:
+                body = body[:2000] + "...[truncated]"
+        else:
+            body = f"<{content_type} response body omitted>"
+
+        LOG.debug(
+            "Venice response %s %s status=%s headers=%s body=%s",
+            method,
+            endpoint,
+            getattr(response, "status_code", "<?>"),
+            header_snapshot,
+            body,
+        )
 
     def post_json(self, endpoint: str, payload: Mapping[str, Any], **kwargs: Any) -> Dict[str, Any]:
         headers = {"Content-Type": "application/json"}

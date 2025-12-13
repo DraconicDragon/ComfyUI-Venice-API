@@ -1,3 +1,5 @@
+import os
+
 API_ENDPOINTS = {
     "list_models": "/models",  # response type is list of strings
     "list_styles": "/image/styles",  #
@@ -16,3 +18,7 @@ VENICEAI_BASE_URL = "https://api.venice.ai/api/v1"
 
 # request hygiene
 USER_AGENT = "ComfyUI-Venice-API/1.0 (by draconicdragon on github)"
+
+
+os.environ["VENICE_CLIENT_DRY_RUN"] = "0"
+os.environ["VENICE_CLIENT_DEBUG"] = "1"
