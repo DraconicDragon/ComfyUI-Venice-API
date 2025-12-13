@@ -67,7 +67,7 @@ _client = VeniceClient()
 
 # to prevent spamming api.
 # can be bypassed by setting force_refresh=True in get_* calls
-_CACHE_TTL = float(os.environ.get("VENICE_CATALOG_TTL", "300"))
+_CACHE_TTL = float(os.environ.get("VENICE_CATALOG_TTL", "900"))
 _models_last_refresh = 0.0
 _styles_last_refresh = 0.0
 _characters_last_refresh = 0.0
