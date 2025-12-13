@@ -1,16 +1,26 @@
-import logging
+from comfy_api.latest import InputImpl, io
 
-from ..nodes.catalog_utils import text2video_model_choices
+from ..nodes.catalog_utils import image2video_model_choices, text2video_model_choices
 from ..nodes.utils import ensure_prompt_length
-from ..nodes.video_utils import poll_video_until_ready, queue_video_job
-
-LOG = logging.getLogger(__name__)
+from ..nodes.video_utils import (
+    get_testing_video_path,
+    list_testing_videos,
+    poll_video_until_ready,
+    queue_video_job,
+)
 
 
 class GenerateVideoFromText:
     @classmethod
     def INPUT_TYPES(cls):
-        model_choices = text2video_model_choices()
+        i2v_models = image2video_model_choices()
+        t2v_models = text2video_model_choices()
+        model_choices = i2v_models + t2v_models
+        # todo: make model choices show model name instead of id for readability and prepend i2v/t2v
+
+        video_choices = list_testing_videos()
+        existing_default = video_choices[0] if video_choices else "none_available"
+        choices_for_combo = video_choices or ["none_available"]
 
         return {
             "required": {
@@ -68,15 +78,40 @@ class GenerateVideoFromText:
                         "tooltip": "Generate audio if the model supports it",
                     },
                 ),
+                "use_existing_video": (
+                    "BOOLEAN",
+                    {
+                        "default": True,  # NOTE: IMPORTANT DEFAULT TO TRUE FOR TESTING PURPOSES THE WHOLE TIME DO NOT REMOVE UNTIL DEPLOYMENT
+                        "tooltip": "Use a cached video from testing_video instead of calling the Venice API",
+                    },
+                ),
+                "existing_video": (
+                    choices_for_combo,
+                    {
+                        "default": existing_default,
+                        "tooltip": "Select the cached video file that should be emitted when bypassing the API",
+                    },
+                ),
             }
         }
 
-    RETURN_TYPES = ("STRING", "STRING")
-    RETURN_NAMES = ("video_path", "queue_id")
+    RETURN_TYPES = ("VIDEO",)
+    RETURN_NAMES = ("video",)
     FUNCTION = "execute"
     CATEGORY = "venice.ai"
 
-    def execute(self, model, prompt, negative_prompt, duration, aspect_ratio, resolution, audio):
+    def execute(
+        self,
+        model,
+        prompt,
+        negative_prompt,
+        duration,
+        aspect_ratio,
+        resolution,
+        audio,
+        use_existing_video,
+        existing_video,
+    ):
         ensure_prompt_length(prompt, 2500, label="Prompt")
         ensure_prompt_length(negative_prompt, 2500, label="Negative Prompt", allow_empty=True)
 
@@ -87,13 +122,24 @@ class GenerateVideoFromText:
             "duration": duration,
             "aspect_ratio": aspect_ratio,
             "resolution": resolution,
-            "audio": audio,
+            # "audio": audio, # todo: this will error with bad request if model without audio support is used, fix with node schema v3 rewrite
         }
+
+        if use_existing_video:
+            if not existing_video:
+                raise ValueError("No cached video selected")
+            cached_files = list_testing_videos()
+            if existing_video not in cached_files:
+                raise ValueError("Selected cached video does not exist anymore")
+            video_path = get_testing_video_path(existing_video)
+            if not video_path.exists():
+                raise ValueError("Cached video file disappeared")
+            return io.NodeOutput(InputImpl.VideoFromFile(video_path))
 
         model_id, queue_id = queue_video_job(payload)
         video_path, _ = poll_video_until_ready(model=model_id, queue_id=queue_id)
 
-        return (video_path, queue_id)
+        return io.NodeOutput(InputImpl.VideoFromFile(video_path))
 
 
 NODE_CLASS_MAPPINGS = {
