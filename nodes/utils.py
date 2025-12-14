@@ -17,7 +17,7 @@ def _round_down(value: int, multiple: int) -> int:
     return (value // multiple) * multiple
 
 
-def ensure_prompt_length(text: str, maximum: int, label: str, allow_empty: bool = False) -> None:
+def ensure_prompt_length(text: str, maximum: int, label: str, *, allow_empty: bool = False) -> None:
     if not text:
         if allow_empty:
             return
@@ -114,6 +114,7 @@ def ensure_multiple_of(width: int, height: int, *, multiple: int = 32) -> None:
     if bad_dimensions:
         dimensions = " and ".join(bad_dimensions)
         raise ValueError(f"{dimensions} must be multiples of {multiple}")
+
 
 # unused right now, might be useful, or not
 def ensure_api_key_valid() -> None:
