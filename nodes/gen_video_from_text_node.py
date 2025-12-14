@@ -10,98 +10,85 @@ from ..nodes.video_utils import (
 )
 
 
-class GenerateVideoFromText:
+class GenerateVideoFromText(io.ComfyNode):
     @classmethod
-    def INPUT_TYPES(cls):
+    def define_schema(cls) -> io.Schema:
         i2v_models = image2video_model_choices()
         t2v_models = text2video_model_choices()
         model_choices = i2v_models + t2v_models
-        # todo: make model choices show model name instead of id for readability and prepend i2v/t2v
 
         video_choices = list_testing_videos()
         existing_default = video_choices[0] if video_choices else "none_available"
         choices_for_combo = video_choices or ["none_available"]
 
-        return {
-            "required": {
-                "model": (
-                    model_choices,
-                    {
-                        # "default": model_choices[0],
-                        "default": "longcat-distilled-text-to-video",
-                        "tooltip": "Model to use for text-to-video generation",
-                    },
+        return io.Schema(
+            node_id="TextToVideo_VENICE",
+            display_name="Generate Video from Text (Venice)",
+            category="venice.ai",
+            inputs=[
+                io.Combo.Input(
+                    "model",
+                    options=model_choices,
+                    default="longcat-distilled-text-to-video",
+                    tooltip="Model to use for text-to-video generation",
                 ),
-                "prompt": (
-                    "STRING",
-                    {
-                        "default": "A cat made of lettuce flying through space",
-                        "placeholder": "Positive Prompt. Example: A cat made of lettuce flying through space",
-                        "tooltip": "Text prompt to generate the video from",
-                        "multiline": True,
-                    },
+                io.String.Input(
+                    "prompt",
+                    default="A cat made of lettuce flying through space",
+                    placeholder="Positive Prompt. Example: A cat made of lettuce flying through space",
+                    tooltip="Text prompt to generate the video from",
+                    multiline=True,
                 ),
-                "negative_prompt": (
-                    "STRING",
-                    {
-                        "default": "low resolution, error, worst quality, low quality, defects",
-                        "placeholder": "Negative Prompt",
-                        "multiline": True,
-                        "tooltip": "Negative prompt to avoid elements in the video",
-                    },
+                io.String.Input(
+                    "negative_prompt",
+                    default="low resolution, error, worst quality, low quality, defects",
+                    placeholder="Negative Prompt",
+                    tooltip="Negative prompt to avoid elements in the video",
+                    multiline=True,
                 ),
-                "duration": (
-                    ["4s", "5s", "6s", "8s", "10s", "12s", "14s", "15s", "16s", "18s", "20s"],
-                    {
-                        "default": "5s",
-                        "tooltip": "Duration of the generated video",
-                    },
+                io.Combo.Input(
+                    "duration",
+                    options=["4s", "5s", "6s", "8s", "10s", "12s", "14s", "15s", "16s", "18s", "20s"],
+                    default="5s",
+                    tooltip="Duration of the generated video",
                 ),
-                "aspect_ratio": (
-                    ["16:9", "9:16", "1:1"],
-                    {
-                        "default": "16:9",
-                        "tooltip": "Aspect ratio for the video",
-                    },
+                io.Combo.Input(
+                    "aspect_ratio",
+                    options=["16:9", "9:16", "1:1"],
+                    default="16:9",
+                    tooltip="Aspect ratio for the video",
                 ),
-                "resolution": (
-                    ["1080p", "720p", "480p"],
-                    {
-                        "default": "720p",
-                        "tooltip": "Resolution of the generated video",
-                    },
+                io.Combo.Input(
+                    "resolution",
+                    options=["1080p", "720p", "480p"],
+                    default="720p",
+                    tooltip="Resolution of the generated video",
                 ),
-                "audio": (
-                    "BOOLEAN",
-                    {
-                        "default": True,
-                        "tooltip": "Generate audio if the model supports it",
-                    },
+                io.Boolean.Input(
+                    "audio",
+                    default=True,
+                    tooltip="Generate audio if the model supports it",
                 ),
-                "use_existing_video": (
-                    "BOOLEAN",
-                    {
-                        "default": True,  # NOTE: IMPORTANT DEFAULT TO TRUE FOR TESTING PURPOSES THE WHOLE TIME DO NOT REMOVE UNTIL DEPLOYMENT
-                        "tooltip": "Use a cached video from testing_video instead of calling the Venice API",
-                    },
+                io.Boolean.Input(
+                    "use_existing_video",
+                    default=True,
+                    tooltip="Use a cached video from testing_video instead of calling the Venice API",
                 ),
-                "existing_video": (
-                    choices_for_combo,
-                    {
-                        "default": existing_default,
-                        "tooltip": "Select the cached video file that should be emitted when bypassing the API",
-                    },
+                io.Combo.Input(
+                    "existing_video",
+                    options=choices_for_combo,
+                    default=existing_default,
+                    tooltip="Select the cached video file that should be emitted when bypassing the API",
                 ),
-            }
-        }
+            ],
+            outputs=[
+                io.Video.Output(id="video", display_name="Video"),
+            ],
+        )
 
-    RETURN_TYPES = ("VIDEO",)
-    RETURN_NAMES = ("video",)
-    FUNCTION = "execute"
-    CATEGORY = "venice.ai"
-
+    @classmethod
     def execute(
-        self,
+        cls,
         model,
         prompt,
         negative_prompt,
@@ -111,7 +98,7 @@ class GenerateVideoFromText:
         audio,
         use_existing_video,
         existing_video,
-    ):
+    ) -> io.NodeOutput:
         ensure_prompt_length(prompt, 2500, label="Prompt")
         ensure_prompt_length(negative_prompt, 2500, label="Negative Prompt", allow_empty=True)
 
@@ -122,7 +109,7 @@ class GenerateVideoFromText:
             "duration": duration,
             "aspect_ratio": aspect_ratio,
             "resolution": resolution,
-            # "audio": audio, # todo: this will error with bad request if model without audio support is used, fix with node schema v3 rewrite
+            # "audio": audio, # todo: this will error if the model lacks audio support, fix with a future schema update
         }
 
         if use_existing_video:
@@ -140,12 +127,3 @@ class GenerateVideoFromText:
         video_path, _ = poll_video_until_ready(model=model_id, queue_id=queue_id)
 
         return io.NodeOutput(InputImpl.VideoFromFile(video_path))
-
-
-NODE_CLASS_MAPPINGS = {
-    "TextToVideo_VENICE": GenerateVideoFromText,
-}
-
-NODE_DISPLAY_NAME_MAPPINGS = {
-    "TextToVideo_VENICE": "Generate Video from Text (Venice)",
-}
