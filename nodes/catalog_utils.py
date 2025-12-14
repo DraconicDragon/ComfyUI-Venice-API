@@ -46,8 +46,15 @@ def image_model_choices() -> Tuple[str, ...]:
 def text2video_model_choices() -> Tuple[str, ...]:
     return _safe_values(lambda: get_models(), "text2video_models")
 
+
 def image2video_model_choices() -> Tuple[str, ...]:
     return _safe_values(lambda: get_models(), "image2video_models")
+
+
+def video_model_specs() -> dict:
+    """Return a by-id mapping of video model specs with constraints for DynamicCombo use."""
+    models = get_models()
+    return models.get("video_models_by_id", {})
 
 
 def text_model_choices() -> Tuple[str, ...]:

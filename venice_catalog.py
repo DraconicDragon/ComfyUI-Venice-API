@@ -78,6 +78,48 @@ def _enrich_models(raw: Dict[str, Any]) -> Dict[str, Any]:
     return raw.copy()
 
 
+def _extract_video_models(payload: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Extract Venice video models and expose a by-id mapping of their constraints.
+
+    The mapping is intentionally lightweight (id, name, model_type, constraints) so downstream
+    callers (nodes) can build DynamicCombo inputs without re-parsing the raw payload.
+    """
+    data = payload.get("data", []) or []
+    by_id: Dict[str, Any] = {}
+
+    for model in data:
+        if model.get("type") != "video":
+            continue
+        model_id = model.get("id")
+        if not model_id:
+            continue
+
+        model_spec = model.get("model_spec") or {}
+        constraints = model_spec.get("constraints") or {}
+        model_type = constraints.get("model_type")
+        if not isinstance(constraints, dict):
+            constraints = {}
+
+        entry = {
+            "id": model_id,
+            "name": model_spec.get("name"),
+            "model_type": model_type,
+            "constraints": {
+                "aspect_ratios": constraints.get("aspect_ratios") or [],
+                "resolutions": constraints.get("resolutions") or [],
+                "durations": constraints.get("durations") or [],
+                "audio": constraints.get("audio"),
+                "audio_configurable": constraints.get("audio_configurable"),
+                "model_type": model_type,
+            },
+            "raw": model,
+        }
+        by_id[model_id] = entry
+
+    return by_id
+
+
 def _should_refresh(last_refresh: float) -> bool:
     if _CACHE_TTL <= 0:
         return False
@@ -184,6 +226,8 @@ def get_models(model_type: Optional[str] = None, *, force_refresh: bool = False)
     if model_type:
         return {"models": _model_store.filter_by_type(payload, model_type)}
 
+    video_models_by_id = _extract_video_models(payload)
+
     filtered = {
         "image_models": sorted([m.get("id") for m in payload.get("data", []) if m.get("type") == "image"]),
         "text_models": sorted([m.get("id") for m in payload.get("data", []) if m.get("type") == "text"]),
@@ -198,24 +242,19 @@ def get_models(model_type: Optional[str] = None, *, force_refresh: bool = False)
         ),
         "text2video_models": sorted(
             [
-                m.get("id")
-                for m in payload.get("data", [])
-                if m.get("type") == "video"
-                and isinstance(m.get("model_spec"), dict)
-                and isinstance(m["model_spec"].get("constraints"), dict)
-                and m["model_spec"]["constraints"].get("model_type") == "text-to-video"
+                model_id
+                for model_id, spec in video_models_by_id.items()
+                if spec.get("constraints", {}).get("model_type") == "text-to-video"
             ]
         ),
         "image2video_models": sorted(
             [
-                m.get("id")
-                for m in payload.get("data", [])
-                if m.get("type") == "video"
-                and isinstance(m.get("model_spec"), dict)
-                and isinstance(m["model_spec"].get("constraints"), dict)
-                and m["model_spec"]["constraints"].get("model_type") == "image-to-video"
+                model_id
+                for model_id, spec in video_models_by_id.items()
+                if spec.get("constraints", {}).get("model_type") == "image-to-video"
             ]
         ),
+        "video_models_by_id": video_models_by_id,
         "model_list_json": payload,
     }
     return filtered
