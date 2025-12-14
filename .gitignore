@@ -4,6 +4,7 @@ js/test.js
 veniceai_config.json
 data/*
 testing_video/*
+nodes/test/*
 
 # Ignore Mac system files
 .DS_Store
