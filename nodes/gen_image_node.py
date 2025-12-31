@@ -45,6 +45,8 @@ class GenerateImage(io.ComfyNode):
         model_choices = list(image_model_choices())
         if not model_choices:
             model_choices = ["none_available"]
+        else: # nano banana has it's own node
+            model_choices = [m for m in model_choices if m != "nano-banana"]
         style_options = list(style_choices())
         if not style_options:
             style_options = ["none_available"]
@@ -65,7 +67,7 @@ class GenerateImage(io.ComfyNode):
                     default="A flying cat made of lettuce",
                     multiline=True,
                     placeholder="Positive Prompt. Example: A flying cat made of lettuce",
-                    tooltip="The text prompt to guide the image generation",
+                    tooltip="The text prompt to guide the image generation. Character limit depends on model (usually around 1500-7500 characters).",
                 ),
                 io.String.Input(
                     "neg_prompt",
