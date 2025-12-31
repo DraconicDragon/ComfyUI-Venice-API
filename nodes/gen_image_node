@@ -24,7 +24,7 @@ class GenerateImage(io.ComfyNode):
             model_choices = ["none_available"]
         style_options = list(style_choices())
         if not style_options:
-            style_options = ["none"]
+            style_options = ["none_available"]
 
         return io.Schema(
             node_id="GenerateImage_VENICE",
@@ -48,8 +48,8 @@ class GenerateImage(io.ComfyNode):
                     "neg_prompt",
                     default="",
                     multiline=True,
-                    placeholder="Negative Prompt. Example: bad composition, low quality",
-                    tooltip="Negative prompt (ignored for models that do not support CFG)",
+                    placeholder="Negative Prompt. Example: low quality, vacant scene",
+                    tooltip="Negative prompt (ignored for models that do not support CFG - z-image-turbo, flux-dev, etc.)",
                 ),
                 io.Int.Input(
                     "width",
@@ -57,7 +57,7 @@ class GenerateImage(io.ComfyNode):
                     min=0,
                     max=2048,
                     step=16,
-                    tooltip="Must be a multiple of 32. Maximum allowed by venice.ai at time of writing is 1280",
+                    tooltip="Width of the image. Maximum allowed by venice.ai at time of writing is 1280. Some models allow smaller stepping, like 1 or 8, while some others require stepping of 16 and so. If no data for this exists for a model, the UI will default to 16 since that is a safe number usually.",
                 ),
                 io.Int.Input(
                     "height",
@@ -65,7 +65,7 @@ class GenerateImage(io.ComfyNode):
                     min=0,
                     max=2048,
                     step=16,
-                    tooltip="Must be a multiple of 32. Maximum allowed by venice.ai at time of writing is 1280",
+                    tooltip="Height of the image. Maximum allowed by venice.ai at time of writing is 1280. Some models allow smaller stepping, like 1 or 8, while some others require stepping of 16 and so. If no data for this exists for a model, the UI will default to 16 since that is a safe number usually.",
                 ),
                 io.Int.Input(
                     "batch_size",
@@ -79,10 +79,7 @@ class GenerateImage(io.ComfyNode):
                     default=20,
                     min=1,
                     max=50,
-                    tooltip=(
-                        "Number of inference steps. Some models have lower per-model max steps, e.g. venice-sd35 (30), "
-                        "fluently-xl (50), flux-dev (30), lustify-sdxl (50), pony-realism (50), stable-diffusion-3.5 (30), juggernaut-xi (50)."
-                    ),
+                    tooltip="Number of inference steps. Some models do not require high steps like z-image-turbo (8 steps)",
                 ),
                 io.Float.Input(
                     "guidance",
@@ -90,7 +87,7 @@ class GenerateImage(io.ComfyNode):
                     min=0.0,
                     max=20.0,
                     step=0.05,
-                    tooltip="CFG scale parameter (or Guidance for Flux models)",
+                    tooltip="CFG scale parameter (or Guidance for Flux-dev models and similar. Has no effect on models like z-image-turbo and similar).",
                 ),
                 io.Combo.Input(
                     "style_preset",
@@ -140,10 +137,6 @@ class GenerateImage(io.ComfyNode):
         ensure_prompt_length(prompt, 1500, "Prompt")
         ensure_prompt_length(neg_prompt, 1500, "Negative Prompt", allow_empty=True)
 
-        if re.match(r"^flux.*", model):
-            LOG.info("VeniceAPI INFO: Ignoring negative prompt for %s.", model)
-            neg_prompt = ""
-
         seed_value = -1 if seed is None else seed
         images_tensor = ()
 
@@ -164,7 +157,7 @@ class GenerateImage(io.ComfyNode):
                 "format": "png",
                 "embed_exif_metadata": True,
             }
-            if style_preset == "none":
+            if style_preset == "none_available" or style_preset == "none":
                 del payload["style_preset"]
 
             for i in range(batch_size):

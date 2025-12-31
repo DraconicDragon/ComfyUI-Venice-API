@@ -2,11 +2,8 @@ import base64
 import io
 import logging
 
-import numpy as np
-import torch  # type: ignore
-import torchvision.transforms as transforms  # type: ignore
+import torchvision.transforms as transforms
 from PIL import Image
-
 
 
 class GenerateImageBase:
