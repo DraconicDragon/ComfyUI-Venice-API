@@ -45,7 +45,7 @@ class GenerateImage(io.ComfyNode):
         model_choices = list(image_model_choices())
         if not model_choices:
             model_choices = ["none_available"]
-        else: # nano banana has it's own node
+        else: # nano banana removed for now
             model_choices = [m for m in model_choices if m != "nano-banana"]
         style_options = list(style_choices())
         if not style_options:
@@ -74,7 +74,7 @@ class GenerateImage(io.ComfyNode):
                     default="",
                     multiline=True,
                     placeholder="Negative Prompt. Example: low quality, vacant scene",
-                    tooltip="Negative prompt (ignored for models that do not support CFG - z-image-turbo, flux-dev, etc.)",
+                    tooltip="Negative prompt (ignored for models that do not support CFG - z-image-turbo, flux-dev, etc.). . Character limit depends on model (usually around 1500-7500 characters).",
                 ),
                 io.Int.Input(
                     "width",
