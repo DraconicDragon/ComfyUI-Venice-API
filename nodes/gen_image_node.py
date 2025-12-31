@@ -1,12 +1,12 @@
 import logging
-import re
+from typing import Any, Dict
 
 import torch
 
 from comfy_api.latest import io
 
 from ..globals import API_ENDPOINTS
-from ..nodes.catalog_utils import image_model_choices, style_choices
+from ..nodes.catalog_utils import image_model_choices, image_model_specs, style_choices
 from ..nodes.gen_image_base import GenerateImageBase
 from ..nodes.utils import ensure_multiple_of, ensure_prompt_length
 from ..venice_client import client
@@ -16,6 +16,29 @@ LOG = logging.getLogger(__name__)
 
 class GenerateImage(io.ComfyNode):
     _processor = GenerateImageBase()
+
+    @classmethod
+    def _image_specs(cls) -> Dict[str, Dict[str, Any]]:
+        specs = image_model_specs() or {}
+        if not specs:
+            raise ValueError(
+                "No Venice image model specs available; refresh the catalog in VeniceAI settings and retry."
+            )
+        return specs
+
+    @staticmethod
+    def _prompt_limit_from_spec(spec: Dict[str, Any] | None, default: int = 1500) -> int:
+        if not spec:
+            return default
+        constraints = spec.get("constraints") or {}
+        limit = constraints.get("promptCharacterLimit")
+        if isinstance(limit, int) and limit > 0:
+            return limit
+        try:
+            normalized = int(limit)
+        except (TypeError, ValueError):
+            return default
+        return normalized if normalized > 0 else default
 
     @classmethod
     def define_schema(cls) -> io.Schema:
@@ -133,9 +156,15 @@ class GenerateImage(io.ComfyNode):
         safe_mode,
         seed=-1,
     ) -> io.NodeOutput:
-        ensure_multiple_of(width, height)
-        ensure_prompt_length(prompt, 1500, "Prompt")
-        ensure_prompt_length(neg_prompt, 1500, "Negative Prompt", allow_empty=True)
+        specs = cls._image_specs()
+        spec = specs.get(model)
+        if spec is None:
+            raise ValueError("Selected model is missing from the Venice catalog; refresh the catalog and try again.")
+        prompt_limit = cls._prompt_limit_from_spec(spec)
+
+        ensure_multiple_of(width, height, multiple=spec.get("constraints", {}).get("dimensionMultiple", 16))
+        ensure_prompt_length(prompt, prompt_limit, "Prompt")
+        ensure_prompt_length(neg_prompt, prompt_limit, "Negative Prompt", allow_empty=True)
 
         seed_value = -1 if seed is None else seed
         images_tensor = ()
@@ -157,8 +186,8 @@ class GenerateImage(io.ComfyNode):
                 "format": "png",
                 "embed_exif_metadata": True,
             }
-            if style_preset == "none_available" or style_preset == "none":
-                del payload["style_preset"]
+            if style_preset in ("none", "none_available"):
+                payload.pop("style_preset", None)
 
             for i in range(batch_size):
                 payload["seed"] = seed_value + i

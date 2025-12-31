@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Iterable, Sequence, Tuple
+from typing import Any, Dict, Iterable, Sequence, Tuple
 
 from ..venice_catalog import get_characters, get_models, get_styles
 
@@ -51,10 +51,16 @@ def image2video_model_choices() -> Tuple[str, ...]:
     return _safe_values(lambda: get_models(), "image2video_models")
 
 
-def video_model_specs() -> dict:
+def video_model_specs() -> Dict[str, Dict[str, Any]]:
     """Return a by-id mapping of video model specs with constraints for DynamicCombo use."""
     models = get_models()
     return models.get("video_models_by_id", {})
+
+
+def image_model_specs() -> Dict[str, Dict[str, Any]]:
+    """Return a by-id mapping of image model specs and constraints for UI validation."""
+    models = get_models()
+    return models.get("image_models_by_id", {})
 
 
 def text_model_choices() -> Tuple[str, ...]:
