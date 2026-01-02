@@ -1,5 +1,4 @@
 import logging
-import re
 from typing import Any, Dict
 
 import torch

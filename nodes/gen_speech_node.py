@@ -1,12 +1,10 @@
 import logging
 import os
-import shutil
 import subprocess
 import tempfile
 
 import requests
 import torch
-import torchaudio
 
 from comfy_api.latest import io
 
