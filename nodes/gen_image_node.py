@@ -232,7 +232,7 @@ class GenerateImage(io.ComfyNode):
                 io.Int.Input(
                     "seed",
                     optional=True,
-                    default=-1,
+                    default=42,
                     min=-0x3B9AC9FF,
                     max=0x3B9AC9FF,
                     tooltip="Seed for reproducibility; leave empty for random values.",
