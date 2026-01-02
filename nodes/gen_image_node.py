@@ -99,7 +99,7 @@ class GenerateImage(io.ComfyNode):
                 min=0,
                 max=2048,
                 step=width_divisor,
-                tooltip="Target width for the generated image; stepping is tied to the model's `widthHeightDivisor`.",
+                tooltip="Target width for the generated image; stepping is tied to the model's `widthHeightDivisor`. Defaults to 16",
             ),
             io.Int.Input(
                 cls._option_input_id(model_id, "height"),
@@ -108,7 +108,7 @@ class GenerateImage(io.ComfyNode):
                 min=0,
                 max=2048,
                 step=width_divisor,
-                tooltip="Target height for the generated image; stepping is tied to the model's `widthHeightDivisor`.",
+                tooltip="Target height for the generated image; stepping is tied to the model's `widthHeightDivisor`. Defaults to 16",
             ),
             io.Int.Input(
                 cls._option_input_id(model_id, "steps"),
@@ -116,7 +116,7 @@ class GenerateImage(io.ComfyNode):
                 default=steps_default,
                 min=1,
                 max=steps_max,
-                tooltip="Number of inference steps. Model constraints can reduce the range.",
+                tooltip="Number of inference steps. Model constraints can reduce the range and have different defaults.",
             ),
         ]
 
@@ -191,7 +191,10 @@ class GenerateImage(io.ComfyNode):
                     default="",
                     multiline=True,
                     placeholder="Negative Prompt. Example: low quality, vacant scene",
-                    tooltip="Negative prompt (ignored for models that do not support CFG - z-image-turbo, flux-dev, etc.). Character limit depends on model (usually around 1500-7500 characters).",
+                    tooltip=(
+                        "Negative prompt (ignored for models that do not support CFG - z-image-turbo, flux-dev, etc.). "
+                        "Character limit depends on model (usually around 1500-7500 characters)."
+                    ),
                 ),
                 io.DynamicCombo.Input(
                     "model",
@@ -211,13 +214,16 @@ class GenerateImage(io.ComfyNode):
                     min=0.0,
                     max=20.0,
                     step=0.05,
-                    tooltip="CFG scale (SDXL based models work well with 6.0, most newer ones work with 3-4. Closed Source models may ignore this setting and distilled models too, such as z-image-turbo or flux-dev and similar).",
+                    tooltip=(
+                        "CFG scale (SDXL based models work well with 6.0, most newer ones work with 3-4. "
+                        "Closed Source models may ignore this setting and distilled models too, such as z-image-turbo or flux-dev and similar)."
+                    ),
                 ),
                 io.Combo.Input(
                     "style_preset",
                     options=list(style_options),
                     default=style_options[0],
-                    tooltip="Style preset to apply to the generated image.",
+                    tooltip="Venice.ai style preset to apply to the generated image.",
                 ),
                 io.Boolean.Input(
                     "hide_watermark",
@@ -235,7 +241,7 @@ class GenerateImage(io.ComfyNode):
                     default=42,
                     min=-0x3B9AC9FF,
                     max=0x3B9AC9FF,
-                    tooltip="Seed for reproducibility; leave empty for random values.",
+                    tooltip="Seed for reproducibility.",
                 ),
             ],
             outputs=[io.Image.Output(id="image", display_name="Image")],
