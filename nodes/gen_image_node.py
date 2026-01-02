@@ -1,6 +1,6 @@
 import logging
 import re
-from typing import Any, Dict, Sequence
+from typing import Any, Dict
 
 import torch
 
@@ -87,12 +87,10 @@ class GenerateImage(io.ComfyNode):
     def _model_option_inputs(
         cls,
         model_id: str,
-        style_options: Sequence[str],
         width_divisor: int,
         steps_default: int,
         steps_max: int,
     ) -> list[io.Input]:
-        style_options_safe = list(style_options) if style_options else ["none_available"]
         return [
             io.Int.Input(
                 cls._option_input_id(model_id, "width"),
@@ -128,48 +126,10 @@ class GenerateImage(io.ComfyNode):
                 max=steps_max,
                 tooltip="Number of inference steps. Model constraints can reduce the range.",
             ),
-            io.Float.Input(
-                cls._option_input_id(model_id, "guidance"),
-                display_name="guidance",
-                default=3.0,
-                min=0.0,
-                max=20.0,
-                step=0.05,
-                tooltip="CFG scale (or Flux Guidance).",
-            ),
-            io.Combo.Input(
-                cls._option_input_id(model_id, "style_preset"),
-                display_name="style_preset",
-                options=style_options_safe,
-                default=style_options_safe[0],
-                tooltip="Style preset to apply to the generated image.",
-            ),
-            io.Boolean.Input(
-                cls._option_input_id(model_id, "hide_watermark"),
-                display_name="hide_watermark",
-                default=True,
-                tooltip="Hide the Venice watermark when possible.",
-            ),
-            io.Boolean.Input(
-                cls._option_input_id(model_id, "safe_mode"),
-                display_name="safe_mode",
-                default=False,
-                tooltip="Enable safe mode (blurs NSFW content).",
-            ),
-            io.Int.Input(
-                cls._option_input_id(model_id, "seed"),
-                display_name="seed",
-                optional=True,
-                default=-1,
-                min=-0x3B9AC9FF,
-                max=0x3B9AC9FF,
-                tooltip="Seed for reproducibility; leave empty for random values.",
-            ),
         ]
 
     @classmethod
     def _build_model_options(cls) -> list[io.DynamicCombo.Option]:
-        style_options = cls._style_options()
         specs = cls._image_specs(require=False)
         options: list[io.DynamicCombo.Option] = []
 
@@ -177,14 +137,15 @@ class GenerateImage(io.ComfyNode):
             return sorted(specs.items())
 
         for model_id, spec in _sorted_model_items():
-            if model_id == "nano-banana":
+            if (
+                model_id == "nano-banana"
+            ):  # todo: implement ui for nano-banana, might be able to use code from video node
                 continue
             constraints = spec.get("constraints") or {}
             width_divisor = cls._width_height_divisor(constraints)
             steps_default, steps_max = cls._steps_limits(constraints)
             option_inputs = cls._model_option_inputs(
                 model_id,
-                style_options,
                 width_divisor,
                 steps_default,
                 steps_max,
@@ -194,7 +155,6 @@ class GenerateImage(io.ComfyNode):
         if not options:
             option_inputs = cls._model_option_inputs(
                 "none_available",
-                style_options,
                 16,
                 20,
                 50,
@@ -220,17 +180,13 @@ class GenerateImage(io.ComfyNode):
     @classmethod
     def define_schema(cls) -> io.Schema:
         model_options = cls._build_model_options()
+        style_options = cls._style_options()
 
         return io.Schema(
             node_id="GenerateImage_VENICE",
             display_name="Generate Image (Venice)",
             category="venice.ai",
             inputs=[
-                io.DynamicCombo.Input(
-                    "model",
-                    options=model_options,
-                    tooltip="Model to use for image generation",
-                ),
                 io.String.Input(
                     "prompt",
                     default="A flying cat made of lettuce",
@@ -243,14 +199,69 @@ class GenerateImage(io.ComfyNode):
                     default="",
                     multiline=True,
                     placeholder="Negative Prompt. Example: low quality, vacant scene",
-                    tooltip="Negative prompt (ignored for models that do not support CFG - z-image-turbo, flux-dev, etc.). . Character limit depends on model (usually around 1500-7500 characters).",
+                    tooltip="Negative prompt (ignored for models that do not support CFG - z-image-turbo, flux-dev, etc.). Character limit depends on model (usually around 1500-7500 characters).",
+                ),
+                io.DynamicCombo.Input(
+                    "model",
+                    options=model_options,
+                    tooltip="Select a Venice image model to auto-populate valid parameters",
+                ),
+                io.Int.Input(
+                    "batch_size",
+                    default=1,
+                    min=1,
+                    max=4,
+                    tooltip="Number of images to generate in a single batch (sequential requests, does not use variants api (yet?)).",
+                ),
+                io.Float.Input(
+                    "guidance",
+                    default=6.0,
+                    min=0.0,
+                    max=20.0,
+                    step=0.05,
+                    tooltip="CFG scale (SDXL based models work well with 6.0, most newer ones work with 3-4. Closed Source models may ignore this setting and distilled models too, such as z-image-turbo or flux-dev and similar).",
+                ),
+                io.Combo.Input(
+                    "style_preset",
+                    options=list(style_options),
+                    default=style_options[0],
+                    tooltip="Style preset to apply to the generated image.",
+                ),
+                io.Boolean.Input(
+                    "hide_watermark",
+                    default=True,
+                    tooltip="Hide the Venice watermark when possible.",
+                ),
+                io.Boolean.Input(
+                    "safe_mode",
+                    default=False,
+                    tooltip="Enable safe mode (blurs NSFW content).",
+                ),
+                io.Int.Input(
+                    "seed",
+                    optional=True,
+                    default=-1,
+                    min=-0x3B9AC9FF,
+                    max=0x3B9AC9FF,
+                    tooltip="Seed for reproducibility; leave empty for random values.",
                 ),
             ],
             outputs=[io.Image.Output(id="image", display_name="Image")],
         )
 
     @classmethod
-    def execute(cls, model, prompt, neg_prompt) -> io.NodeOutput:
+    def execute(
+        cls,
+        model,
+        prompt,
+        neg_prompt,
+        guidance,
+        batch_size,
+        style_preset,
+        hide_watermark,
+        safe_mode,
+        seed=-1,
+    ) -> io.NodeOutput:
         if not isinstance(model, dict) or "model" not in model:
             raise ValueError("Model selection is required")
 
@@ -263,26 +274,23 @@ class GenerateImage(io.ComfyNode):
         constraints = spec.get("constraints") or {}
         prompt_limit = cls._prompt_limit_from_spec(spec)
         width_height_divisor = cls._width_height_divisor(constraints)
-        steps_default, steps_max = cls._steps_limits(constraints)
+        steps_default, _steps_max = cls._steps_limits(constraints)
 
         width = int(cls._resolve_option_value(model, model_id, "width", 1024))
         height = int(cls._resolve_option_value(model, model_id, "height", 1024))
-        batch_size = int(cls._resolve_option_value(model, model_id, "batch_size", 1))
         steps = int(cls._resolve_option_value(model, model_id, "steps", steps_default))
-        guidance = float(cls._resolve_option_value(model, model_id, "guidance", 3.0))
+        guidance = float(guidance)
+        batch_size = int(batch_size)
         style_options = cls._style_options()
-        style_preset = cls._resolve_option_value(model, model_id, "style_preset", style_options[0])
-        hide_watermark = bool(cls._resolve_option_value(model, model_id, "hide_watermark", True))
-        safe_mode = bool(cls._resolve_option_value(model, model_id, "safe_mode", False))
-        seed = cls._resolve_option_value(model, model_id, "seed", -1)
+        if style_preset not in style_options:
+            style_preset = style_options[0]
+        hide_watermark = bool(hide_watermark)
+        safe_mode = bool(safe_mode)
+        seed = seed
 
         ensure_multiple_of(width, height, multiple=width_height_divisor)
         ensure_prompt_length(prompt, prompt_limit, "Prompt")
         ensure_prompt_length(neg_prompt, prompt_limit, "Negative Prompt", allow_empty=True)
-
-        if re.match(r"^flux.*", model_id):
-            LOG.info("VeniceAPI INFO: Ignoring negative prompt for %s.", model_id)
-            neg_prompt = ""
 
         seed_value = -1 if seed is None else int(seed)
         images_tensor = ()
