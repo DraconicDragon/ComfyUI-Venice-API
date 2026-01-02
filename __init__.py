@@ -1,10 +1,11 @@
 import os
 
-from comfy_api.latest import ComfyExtension, io
-
 from .nodes.gen_image_node import GenerateImage
+from .nodes.gen_speech_node import GenerateSpeech
 from .nodes.gen_video_from_text_node import GenerateVideoFromText
 from .nodes.test_node import DCTestNode
+
+from comfy_api.latest import ComfyExtension, io
 
 
 class VeniceExtension(ComfyExtension):
@@ -12,6 +13,7 @@ class VeniceExtension(ComfyExtension):
         return [
             DCTestNode,
             GenerateImage,
+            GenerateSpeech,
             GenerateVideoFromText,
         ]
 
