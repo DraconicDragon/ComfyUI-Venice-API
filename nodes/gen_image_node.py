@@ -111,14 +111,6 @@ class GenerateImage(io.ComfyNode):
                 tooltip="Target height for the generated image; stepping is tied to the model's `widthHeightDivisor`.",
             ),
             io.Int.Input(
-                cls._option_input_id(model_id, "batch_size"),
-                display_name="batch_size",
-                default=1,
-                min=1,
-                max=4,
-                tooltip="Number of images to generate in a single batch (sequential requests).",
-            ),
-            io.Int.Input(
                 cls._option_input_id(model_id, "steps"),
                 display_name="steps",
                 default=steps_default,
