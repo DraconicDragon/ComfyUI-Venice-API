@@ -1,10 +1,7 @@
 import logging
-import os
 import tempfile
 import time
-from pathlib import Path
-from typing import List, Optional, Tuple
-
+from typing import Optional, Tuple
 
 from comfy.utils import ProgressBar  # type: ignore
 
@@ -17,10 +14,6 @@ LOG = logging.getLogger(__name__)
 POLL_INTERVAL_SECONDS = 5
 MAX_POLLS = 100  # MAX_POLLS * POLL_INTERVAL_SECONDS = x minutes total wait time
 PROGRESS_BAR_TOTAL = 100
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-VIDEO_OUTPUT_DIR = PROJECT_ROOT / "testing_video"
-VIDEO_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-DEBUG_SAVE_API_VIDEOS = os.environ.get("VENICE_CLIENT_DEBUG", "").lower() in {"1", "true"}
 
 
 def queue_video_job(payload: dict) -> Tuple[str, str]:
@@ -45,13 +38,6 @@ def _guess_suffix(content_type: str) -> str:
     if "quicktime" in content_type or "mov" in content_type:
         return ".mov"
     return ".bin"
-
-
-def _build_video_path(queue_id: str, suffix: str) -> Path:
-    clean_id = "".join(ch if ch.isalnum() or ch in "-_" else "_" for ch in queue_id)
-    timestamp = int(time.time())
-    filename = f"{clean_id or 'queue'}_{timestamp}{suffix}"
-    return VIDEO_OUTPUT_DIR / filename
 
 
 def poll_video_until_ready(
@@ -123,14 +109,9 @@ def poll_video_until_ready(
 
         # Got binary content (video)
         suffix = _guess_suffix(ctype)
-        if DEBUG_SAVE_API_VIDEOS:
-            video_path = _build_video_path(queue_id, suffix)
-            with open(video_path, "wb") as fp:
-                fp.write(resp.content)
-        else:
-            with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp_file:
-                tmp_file.write(resp.content)
-                video_path = Path(tmp_file.name)
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp_file:
+            tmp_file.write(resp.content)
+            video_path = tmp_file.name
 
         LOG.debug(
             "Venice video ready: queue_id=%s saved_to=%s content_type=%s",
@@ -147,18 +128,3 @@ def poll_video_until_ready(
     raise VeniceAPIError(
         f"Timed out waiting for Venice video. queue_id={queue_id} after {max_polls * poll_interval:.0f}s"
     )
-
-
-def list_testing_videos() -> List[str]:
-    """Return cached video filenames that can be selected inside a node."""
-    if not VIDEO_OUTPUT_DIR.exists():
-        return []
-    return sorted(entry.name for entry in VIDEO_OUTPUT_DIR.iterdir() if entry.is_file())
-
-
-def get_testing_video_path(filename: str) -> Path:
-    """Resolve the video file inside testing_video and ensure it exists."""
-    video_path = VIDEO_OUTPUT_DIR / filename
-    if not video_path.exists() or not video_path.is_file():
-        raise FileNotFoundError(f"Test video not found: {filename}")
-    return video_path

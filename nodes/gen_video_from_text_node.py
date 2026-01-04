@@ -5,12 +5,7 @@ from comfy_api.latest import InputImpl, io
 
 from ..nodes.catalog_utils import video_model_specs
 from ..nodes.utils import encode_tensor_for_vision, ensure_prompt_length
-from ..nodes.video_utils import (
-    get_testing_video_path,
-    list_testing_videos,
-    poll_video_until_ready,
-    queue_video_job,
-)
+from ..nodes.video_utils import poll_video_until_ready, queue_video_job
 
 LOG = logging.getLogger(__name__)
 
@@ -138,10 +133,6 @@ class GenerateVideoFromText(io.ComfyNode):
 
     @classmethod
     def define_schema(cls) -> io.Schema:
-        video_choices = list_testing_videos()
-        existing_default = video_choices[0] if video_choices else "none_available"
-        choices_for_combo = video_choices or ["none_available"]
-
         model_options = cls._build_model_options()
 
         return io.Schema(
@@ -168,17 +159,6 @@ class GenerateVideoFromText(io.ComfyNode):
                     tooltip="Negative prompt to avoid elements in the video",
                     multiline=True,
                 ),
-                io.Boolean.Input(
-                    "use_existing_video",
-                    default=True,
-                    tooltip="Use a cached video from testing_video instead of calling the Venice API",
-                ),
-                io.Combo.Input(
-                    "existing_video",
-                    options=choices_for_combo,
-                    default=existing_default,
-                    tooltip="Select the cached video file that should be emitted when bypassing the API",
-                ),
             ],
             outputs=[
                 io.Video.Output(id="video", display_name="Video"),
@@ -191,8 +171,6 @@ class GenerateVideoFromText(io.ComfyNode):
         model,
         prompt,
         negative_prompt,
-        use_existing_video,
-        existing_video,
     ) -> io.NodeOutput:
         ensure_prompt_length(prompt, 2500, label="Prompt")
         ensure_prompt_length(negative_prompt, 2500, label="Negative Prompt", allow_empty=True)
@@ -256,17 +234,6 @@ class GenerateVideoFromText(io.ComfyNode):
             if image is None:
                 raise ValueError(f"Model {model_id} requires an input image")
             payload["image_url"] = encode_tensor_for_vision(image)
-
-        if use_existing_video:
-            if not existing_video:
-                raise ValueError("No cached video selected")
-            cached_files = list_testing_videos()
-            if existing_video not in cached_files:
-                raise ValueError("Selected cached video does not exist anymore")
-            video_path = get_testing_video_path(existing_video)
-            if not video_path.exists():
-                raise ValueError("Cached video file disappeared")
-            return io.NodeOutput(InputImpl.VideoFromFile(video_path))
 
         model_id_resp, queue_id = queue_video_job(payload)
         video_path, _ = poll_video_until_ready(model=model_id_resp, queue_id=queue_id)
