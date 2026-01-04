@@ -6,6 +6,7 @@ from .nodes.gen_image_node import GenerateImage
 from .nodes.gen_speech_node import GenerateSpeech
 from .nodes.gen_text_node import GenerateTextAdvanced
 from .nodes.gen_video_from_text_node import GenerateVideoFromText
+from .nodes.i2i_enhance_upscale import I2IEnhanceUpscale
 from .nodes.test_node import DCTestNode
 
 
@@ -17,6 +18,7 @@ class VeniceExtension(ComfyExtension):
             GenerateSpeech,
             GenerateTextAdvanced,
             GenerateVideoFromText,
+            I2IEnhanceUpscale,
         ]
 
 
