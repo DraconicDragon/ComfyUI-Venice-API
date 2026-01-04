@@ -183,7 +183,7 @@ class GenerateTextAdvanced(io.ComfyNode):
             io.Boolean.Input(
                 cls._option_input_id(model_id, "vp_include_venice_system_prompt"),
                 display_name="vp_include_venice_system_prompt",
-                default=True,
+                default=False,
                 tooltip="Include Venice-supplied system prompts alongside your own.",
             )
         )
