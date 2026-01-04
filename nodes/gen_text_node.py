@@ -1,3 +1,5 @@
+import json
+import logging
 from typing import Any, Dict, Iterable
 
 from comfy_api.latest import io
@@ -6,6 +8,8 @@ from ..globals import API_ENDPOINTS
 from ..nodes.catalog_utils import character_choices, text_model_specs
 from ..nodes.utils import encode_tensor_for_vision
 from ..venice_client import client
+
+logger = logging.getLogger(__name__)
 
 
 class GenerateTextAdvanced(io.ComfyNode):
@@ -87,16 +91,6 @@ class GenerateTextAdvanced(io.ComfyNode):
                 ),
             ]
 
-            if capabilities.get("supportsReasoning"):
-                option_inputs.append(
-                    io.Boolean.Input(
-                        cls._option_input_id(model_id, "reasoning"),
-                        display_name="reasoning",
-                        default=True,
-                        tooltip="Toggle reasoning capabilities for this model.",
-                    )
-                )
-
             if capabilities.get("supportsVision"):
                 option_inputs.append(
                     io.Boolean.Input(
@@ -106,12 +100,14 @@ class GenerateTextAdvanced(io.ComfyNode):
                         tooltip="Enable vision inputs when the model supports vision.",
                     )
                 )
+
+            if capabilities.get("supportsReasoning"):
                 option_inputs.append(
-                    io.Image.Input(
-                        cls._option_input_id(model_id, "image_for_vision"),
-                        display_name="vision_image",
-                        optional=True,
-                        tooltip="Optional image input for vision-capable models.",
+                    io.Boolean.Input(
+                        cls._option_input_id(model_id, "reasoning"),
+                        display_name="reasoning",
+                        default=True,
+                        tooltip="Toggle reasoning capabilities for this model.",
                     )
                 )
 
@@ -211,6 +207,12 @@ class GenerateTextAdvanced(io.ComfyNode):
                     multiline=True,
                     tooltip="Optional system prompt to guide the model's behavior.",
                 ),
+                io.Image.Input(
+                    "vision_image",
+                    display_name="vision_image",
+                    optional=True,
+                    tooltip="Optional image for vision-capable models. Enable the vision toggle to send it.",
+                ),
                 io.DynamicCombo.Input(
                     "model",
                     options=model_options,
@@ -293,14 +295,23 @@ class GenerateTextAdvanced(io.ComfyNode):
                 io.String.Input(
                     "stop_tokens",
                     default="",
-                    multiline=True,
-                    optional=True,
                     tooltip="Optional comma- or newline-separated tokens to stop generation on (requires at least one).",
                 ),
+                    io.Int.Input(
+                        "seed",
+                        default=42,
+                        min=1,
+                        tooltip="Seed for Venice randomness; must be 1 or greater.",
+                    ),
                 io.Boolean.Input(
                     "enable_system_prompt",
                     default=True,
                     tooltip="Enable or disable system prompt being passed on.",
+                ),
+                io.Boolean.Input(
+                    "debug_append_response",
+                    default=False,
+                    tooltip="Append the raw Venice response after three newlines for debugging.",
                 ),
             ],
             outputs=[io.String.Output(id="response", display_name="response")],
@@ -312,6 +323,7 @@ class GenerateTextAdvanced(io.ComfyNode):
         model,
         prompt,
         system_prompt,
+        vision_image,
         frequency_penalty,
         presence_penalty,
         repetition_penalty,
@@ -321,7 +333,9 @@ class GenerateTextAdvanced(io.ComfyNode):
         top_k,
         min_p,
         stop_tokens,
+        seed,
         enable_system_prompt,
+        debug_append_response,
     ) -> io.NodeOutput:
         if isinstance(model, str):
             model = {"model": model}
@@ -363,15 +377,20 @@ class GenerateTextAdvanced(io.ComfyNode):
             if capabilities.get("supportsVision")
             else False
         )
-        vision_image = cls._get_option_value(model, model_id, "image_for_vision")
         vision_tensor = None
         if vision_image is not None:
-            if isinstance(vision_image, (list, tuple)):
-                if len(vision_image) > 0 and vision_image[0] is not None:
-                    vision_tensor = vision_image[0]
-            else:
-                vision_tensor = vision_image
+            candidates = vision_image if isinstance(vision_image, (list, tuple)) else (vision_image,)
+            for candidate in candidates:
+                if candidate is not None:
+                    vision_tensor = candidate
+                    break
         normalized_stop_tokens = cls._normalize_stop_tokens(stop_tokens)
+        try:
+            seed_value = int(seed)
+        except (TypeError, ValueError):
+            seed_value = 42
+        if seed_value < 1:
+            seed_value = 1
 
         venice_parameters: Dict[str, Any] = {}
 
@@ -403,6 +422,11 @@ class GenerateTextAdvanced(io.ComfyNode):
 
         _set_bool("vp_include_venice_system_prompt", "include_venice_system_prompt")
 
+        if vision_tensor is not None and (not capabilities.get("supportsVision") or not vision_enabled):
+            logger.warning(
+                "Vision image provided but model %s does not support vision, or enable_vision is disabled",
+                model_id,
+            )
         if vision_enabled and vision_tensor is None:
             raise ValueError("Vision input is enabled but no image was provided")
 
@@ -437,7 +461,7 @@ class GenerateTextAdvanced(io.ComfyNode):
             "n": 1,  # basically batch size
             "presence_penalty": presence_penalty,
             "repetition_penalty": repetition_penalty,
-            "seed": 42,
+            "seed": seed_value,
             "stream": False,
             "temperature": temperature_value,
             "top_k": top_k,
@@ -454,8 +478,21 @@ class GenerateTextAdvanced(io.ComfyNode):
 
         json_response = client.post_json(API_ENDPOINTS["text_generate"], payload)
         try:
-            content = json_response["choices"][0]["message"]["content"]
+            choice = json_response["choices"][0]
+            logger.info(
+                "Venice LLM finish_reason=%s native_finish_reason=%s stop_reason=%s",
+                choice.get("finish_reason"),
+                choice.get("native_finish_reason"),
+                choice.get("stop_reason"),
+            )
+            content = choice["message"]["content"]
         except (KeyError, IndexError, TypeError) as exc:
             raise ValueError(f"Unexpected API response format: {json_response}") from exc
+        if debug_append_response:
+            try:
+                raw_dump = json.dumps(json_response, indent=2)
+            except (TypeError, ValueError):
+                raw_dump = str(json_response)
+            content = f"{content}\n\n\n{raw_dump}"
 
         return io.NodeOutput(content)
