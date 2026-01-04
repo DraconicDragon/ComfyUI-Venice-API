@@ -48,6 +48,10 @@ def encode_tensor_for_vision(image_tensor: torch.Tensor, *, max_encoded_bytes: i
         If the tensor does not have 3 dimensions or the last dimension is not 3 or 4.
     """
     tensor = image_tensor.detach().cpu()
+    if tensor.ndim == 4 and tensor.shape[0] == 1:
+        tensor = tensor[0]
+    if tensor.ndim == 3 and tensor.shape[-1] not in {3, 4} and tensor.shape[0] in {3, 4}:
+        tensor = tensor.permute(1, 2, 0)
     if tensor.ndim != 3 or tensor.shape[-1] not in {3, 4}:
         raise ValueError("Vision images must be height×width×(3 or 4 channels)")
 

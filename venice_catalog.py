@@ -147,6 +147,37 @@ def _extract_image_models(payload: Dict[str, Any]) -> Dict[str, Any]:
     return by_id
 
 
+def _extract_text_models(payload: Dict[str, Any]) -> Dict[str, Any]:
+    data = payload.get("data", []) or []
+    by_id: Dict[str, Any] = {}
+
+    for model in data:
+        if model.get("type") != "text":
+            continue
+        model_id = model.get("id")
+        if not model_id:
+            continue
+
+        model_spec = model.get("model_spec") or {}
+        constraints = model_spec.get("constraints") or {}
+        capabilities = model_spec.get("capabilities") or {}
+        if not isinstance(constraints, dict):
+            constraints = {}
+        if not isinstance(capabilities, dict):
+            capabilities = {}
+
+        entry = {
+            "id": model_id,
+            "name": model_spec.get("name"),
+            "constraints": dict(constraints),
+            "capabilities": dict(capabilities),
+            "raw": model,
+        }
+        by_id[model_id] = entry
+
+    return by_id
+
+
 def _should_refresh(last_refresh: float) -> bool:
     if _CACHE_TTL <= 0:
         return False
@@ -255,13 +286,13 @@ def get_models(model_type: Optional[str] = None, *, force_refresh: bool = False)
 
     video_models_by_id = _extract_video_models(payload)
     image_models_by_id = _extract_image_models(payload)
+    text_models_by_id = _extract_text_models(payload)
 
     # todo: maybe dataclass is better for this
     filtered = {
         # todo: the *_by_id might be enough so this stuff below can be removed
         "image_models": sorted([m.get("id") for m in payload.get("data", []) if m.get("type") == "image"]),
         "text_models": sorted([m.get("id") for m in payload.get("data", []) if m.get("type") == "text"]),
-
         # todo: voices should be linked to models like in models json
         "tts_models": sorted([m.get("id") for m in payload.get("data", []) if m.get("type") == "tts"]),
         "tts_voices": sorted(
@@ -289,6 +320,7 @@ def get_models(model_type: Optional[str] = None, *, force_refresh: bool = False)
         "video_models_by_id": video_models_by_id,
         "image_models_by_id": image_models_by_id,
         "model_list_json": payload,
+        "text_models_by_id": text_models_by_id,
     }
     return filtered
 

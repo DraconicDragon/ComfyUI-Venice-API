@@ -63,6 +63,12 @@ def image_model_specs() -> Dict[str, Dict[str, Any]]:
     return models.get("image_models_by_id", {})
 
 
+def text_model_specs() -> Dict[str, Dict[str, Any]]:
+    """Return a by-id mapping of text model specs and constraints for UI validation."""
+    models = get_models()
+    return models.get("text_models_by_id", {})
+
+
 def text_model_choices() -> Tuple[str, ...]:
     return _safe_values(lambda: get_models(), "text_models")
 
