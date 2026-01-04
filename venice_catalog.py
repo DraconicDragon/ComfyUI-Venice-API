@@ -256,10 +256,13 @@ def get_models(model_type: Optional[str] = None, *, force_refresh: bool = False)
     video_models_by_id = _extract_video_models(payload)
     image_models_by_id = _extract_image_models(payload)
 
+    # todo: maybe dataclass is better for this
     filtered = {
         # todo: the *_by_id might be enough so this stuff below can be removed
         "image_models": sorted([m.get("id") for m in payload.get("data", []) if m.get("type") == "image"]),
         "text_models": sorted([m.get("id") for m in payload.get("data", []) if m.get("type") == "text"]),
+
+        # todo: voices should be linked to models like in models json
         "tts_models": sorted([m.get("id") for m in payload.get("data", []) if m.get("type") == "tts"]),
         "tts_voices": sorted(
             [
