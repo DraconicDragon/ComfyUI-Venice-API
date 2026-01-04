@@ -61,7 +61,7 @@ class I2IEnhanceUpscale(io.ComfyNode):
                     "enhance_prompt",
                     default="",
                     multiline=True,
-                    placeholder="gold, graffiti, minimalistic",
+                    placeholder="Prompt for enhance. Example: gold, graffiti, minimalistic",
                     tooltip=(
                         "The text to image style to apply during prompt enhancement. "
                         "Does best with short descriptive prompts, like gold, marble or angry, menacing."
